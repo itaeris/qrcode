@@ -17,13 +17,12 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['save']);
-const size = ref(1024);
 const copied = ref(false);
 const downloadError = ref('');
 
 const safeSvg = computed(() => (props.svg.startsWith('<svg') && !props.svg.includes('<script') ? props.svg : ''));
 const canDownload = computed(() => safeSvg.value && (!props.smart || (props.saved && !props.dirty)));
-const saveLabel = computed(() => (props.saved ? 'Perbarui QR cerdas' : 'Simpan QR cerdas'));
+const showSave = computed(() => props.saving || (Boolean(safeSvg.value) && (!props.saved || props.dirty)));
 
 const contrastLow = computed(() => {
     const ratio = contrast(props.foreground, props.background);
@@ -58,7 +57,7 @@ async function png() {
     downloadError.value = '';
 
     try {
-        await downloadPng(safeSvg.value, Number(size.value), `${props.filename}.png`, props.background);
+        await downloadPng(safeSvg.value, 512, `${props.filename}.png`, props.background);
     } catch {
         downloadError.value = 'PNG gagal dibuat di browser ini. Unduh SVG.';
     }
@@ -107,29 +106,22 @@ async function copyLink() {
             </div>
             <div class="mt-4 grid gap-2">
                 <button
-                    v-if="smart"
+                    v-if="showSave"
                     type="button"
-                    class="rounded-full bg-[#6d28d9] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
+                    class="rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50"
                     :disabled="saving"
                     @click="emit('save')"
                 >
-                    {{ saving ? 'Menyimpan…' : saveLabel }}
+                    {{ saving ? 'Menyimpan…' : 'Simpan' }}
                 </button>
-                <div class="grid grid-cols-[1fr_auto] gap-2">
-                    <button type="button" class="inline-flex items-center justify-center gap-2 rounded-full border border-[#e6e7ee] px-4 py-2.5 text-sm font-medium disabled:opacity-40" :disabled="!canDownload" @click="png">
-                        <Download :size="16" />
-                        PNG
-                    </button>
-                    <select v-model="size" class="rounded-full border border-[#e6e7ee] bg-white px-3 text-sm" :disabled="!canDownload">
-                        <option :value="512">512</option>
-                        <option :value="1024">1024</option>
-                        <option :value="2048">2048</option>
-                    </select>
-                </div>
+                <button type="button" class="inline-flex items-center justify-center gap-2 rounded-full border border-[#e6e7ee] px-4 py-2.5 text-sm font-medium disabled:opacity-40" :disabled="!canDownload" @click="png">
+                    <Download :size="16" />
+                    PNG
+                </button>
                 <button type="button" class="rounded-full border border-[#e6e7ee] px-4 py-2.5 text-sm font-medium disabled:opacity-40" :disabled="!canDownload" @click="svgFile">
                     Unduh SVG
                 </button>
-                <button v-if="saved?.url" type="button" class="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm text-[#6d28d9]" @click="copyLink">
+                <button v-if="saved?.url" type="button" class="inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm text-[#7a2030]" @click="copyLink">
                     <Check v-if="copied" :size="16" />
                     <Copy v-else :size="16" />
                     {{ copied ? 'Tersalin' : 'Salin tautan' }}

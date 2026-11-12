@@ -73,7 +73,7 @@ function addUser() {
                         autocomplete="new-password"
                     />
                 </div>
-                <button type="submit" class="mt-6 rounded-full bg-[#6d28d9] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="passwordForm.processing">
+                <button type="submit" class="mt-6 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="passwordForm.processing">
                     {{ passwordForm.processing ? 'Menyimpan…' : 'Simpan kata sandi' }}
                 </button>
             </form>
@@ -88,7 +88,7 @@ function addUser() {
                             type="text"
                             autocomplete="name"
                             required
-                            class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#c4b5fd] focus:ring-4 focus:ring-[#efe7ff]"
+                            class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]"
                         />
                         <span v-if="userForm.errors.name" class="text-[#9f1239]">{{ userForm.errors.name }}</span>
                     </label>
@@ -99,7 +99,7 @@ function addUser() {
                             type="email"
                             autocomplete="off"
                             required
-                            class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#c4b5fd] focus:ring-4 focus:ring-[#efe7ff]"
+                            class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]"
                             placeholder="nama@contoh.com"
                         />
                         <span v-if="userForm.errors.email" class="text-[#9f1239]">{{ userForm.errors.email }}</span>
@@ -118,7 +118,7 @@ function addUser() {
                         autocomplete="new-password"
                     />
                 </div>
-                <button type="submit" class="mt-6 rounded-full bg-[#6d28d9] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="userForm.processing">
+                <button type="submit" class="mt-6 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="userForm.processing">
                     {{ userForm.processing ? 'Menambahkan…' : 'Tambah pengguna' }}
                 </button>
             </form>

@@ -38,7 +38,7 @@ const visible = computed(() => {
                 type="button"
                 class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-medium transition"
                 :class="modelValue === type.id
-                    ? 'border-[#e4d4ff] bg-[#efe7ff] text-[#6d28d9]'
+                    ? 'border-[#f0d0d5] bg-[#f8e8ea] text-[#7a2030]'
                     : 'border-[#e6e7ee] bg-white text-[#2a2a32] shadow-[0_1px_2px_rgba(20,18,31,0.04)] hover:border-[#d5d6e0]'"
                 :aria-pressed="modelValue === type.id"
                 @click="emit('update:modelValue', type.id)"

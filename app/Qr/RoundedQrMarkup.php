@@ -22,7 +22,7 @@ class RoundedQrMarkup extends QRMarkupSVG
             return "M{$x} {$y} h1 v1 h-1Z";
         }
 
-        $radius = 0.22;
+        $radius = 0.42;
         $right = $x + 1;
         $bottom = $y + 1;
         $x1 = $x + $radius;

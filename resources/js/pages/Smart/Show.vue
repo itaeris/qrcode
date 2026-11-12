@@ -24,7 +24,7 @@ function checkIn() {
     <Head :title="qr.title" />
     <AppShell>
         <article class="mx-auto max-w-lg rounded-[28px] border border-[#e6e7ee] bg-white p-6 shadow-[0_1px_2px_rgba(20,18,31,0.04)] sm:p-8">
-            <div class="text-xs font-medium tracking-wide text-[#6d28d9] uppercase">{{ qr.type_label }}</div>
+            <div class="text-xs font-medium tracking-wide text-[#7a2030] uppercase">{{ qr.type_label }}</div>
             <h1 class="mt-2 text-2xl font-semibold tracking-tight">{{ presentation.headline || qr.title }}</h1>
             <p v-if="presentation.subline" class="mt-2 text-sm text-[#6d6a7a]">{{ presentation.subline }}</p>
             <div
@@ -49,14 +49,14 @@ function checkIn() {
                     v-for="action in presentation.actions"
                     :key="action.href + action.label"
                     :href="action.href"
-                    class="rounded-full bg-[#6d28d9] px-4 py-2.5 text-center text-sm font-medium text-white"
+                    class="rounded-full bg-[#7a2030] px-4 py-2.5 text-center text-sm font-medium text-white"
                 >
                     {{ action.label }}
                 </a>
             </div>
             <form v-if="presentation.check_in" class="mt-5 grid gap-2" @submit.prevent="checkIn">
                 <label class="text-sm font-medium" for="attendee">Nama</label>
-                <input id="attendee" v-model="form.name" type="text" maxlength="80" required class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#c4b5fd]" placeholder="Nama kamu" />
+                <input id="attendee" v-model="form.name" type="text" maxlength="80" required class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#e3b3ba]" placeholder="Nama kamu" />
                 <p v-if="form.errors.name" class="text-sm text-[#9f1239]">{{ form.errors.name }}</p>
                 <p v-if="success" class="text-sm text-[#166534]">{{ success }}</p>
                 <button type="submit" class="rounded-full bg-[#111827] px-4 py-2.5 text-sm font-medium text-white" :disabled="form.processing">
@@ -65,7 +65,7 @@ function checkIn() {
             </form>
         </article>
         <p v-if="page.props.auth?.user" class="mt-6 text-center text-sm text-[#8a8794]">
-            <Link href="/buat" class="text-[#6d28d9]">Buat QR sendiri</Link>
+            <Link href="/buat" class="text-[#7a2030]">Buat QR sendiri</Link>
         </p>
     </AppShell>
 </template>

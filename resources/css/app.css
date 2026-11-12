@@ -16,3 +16,24 @@
     width: 100%;
     height: auto;
 }
+
+.color-well {
+    width: 2.75rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: 0.75rem;
+    border: 1px solid #e6e7ee;
+    background: #fff;
+    padding: 0.25rem;
+}
+
+.color-well::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+
+.color-well::-webkit-color-swatch,
+.color-well::-moz-color-swatch {
+    border: none;
+    border-radius: 0.45rem;
+}

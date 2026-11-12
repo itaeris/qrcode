@@ -22,7 +22,7 @@ function submit() {
     <div class="grid min-h-screen place-items-center bg-[#f4f5f8] px-4 py-10">
         <form class="w-full max-w-sm rounded-[28px] border border-[#e6e7ee] bg-white p-6 shadow-[0_1px_2px_rgba(20,18,31,0.04)] sm:p-8" @submit.prevent="submit">
             <div class="mb-6 flex items-center gap-2.5">
-                <span class="grid h-9 w-9 grid-cols-2 gap-0.5 rounded-xl bg-[#efe7ff] p-1.5 text-[#6d28d9]">
+                <span class="grid h-9 w-9 grid-cols-2 gap-0.5 rounded-xl bg-[#f8e8ea] p-1.5 text-[#7a2030]">
                     <span class="rounded-[3px] bg-current" />
                     <span class="rounded-[3px] bg-current opacity-70" />
                     <span class="rounded-[3px] bg-current opacity-70" />
@@ -39,7 +39,7 @@ function submit() {
                     type="email"
                     autocomplete="username"
                     required
-                    class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#c4b5fd] focus:ring-4 focus:ring-[#efe7ff]"
+                    class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]"
                     placeholder="nama@contoh.com"
                 />
             </label>
@@ -52,7 +52,7 @@ function submit() {
                         :type="showPassword ? 'text' : 'password'"
                         autocomplete="current-password"
                         required
-                        class="w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 pr-11 outline-none focus:border-[#c4b5fd] focus:ring-4 focus:ring-[#efe7ff]"
+                        class="w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 pr-11 outline-none focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]"
                     />
                     <button
                         type="button"
@@ -66,13 +66,13 @@ function submit() {
                 </div>
             </div>
             <label class="mt-4 flex items-center gap-2 text-sm text-[#3f3d48]">
-                <input v-model="form.remember" type="checkbox" class="size-4 accent-[#7c3aed]" />
+                <input v-model="form.remember" type="checkbox" class="size-4 accent-[#9b2335]" />
                 Ingat saya
             </label>
             <p v-if="form.errors.email || form.errors.password" class="mt-4 text-sm text-[#9f1239]">
                 {{ form.errors.email || form.errors.password }}
             </p>
-            <button type="submit" class="mt-6 w-full rounded-full bg-[#6d28d9] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="form.processing">
+            <button type="submit" class="mt-6 w-full rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="form.processing">
                 {{ form.processing ? 'Memeriksa…' : 'Masuk' }}
             </button>
         </form>

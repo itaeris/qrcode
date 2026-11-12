@@ -40,7 +40,7 @@ function active(path) {
         <header class="sticky top-0 z-20 border-b border-[#eceef3] bg-[#f4f5f8]/90 backdrop-blur">
             <div class="mx-auto flex min-h-16 max-w-[1200px] items-center justify-between gap-3 px-4 py-2 sm:px-6">
                 <Link href="/" class="flex items-center gap-2.5">
-                    <span class="grid h-9 w-9 grid-cols-2 gap-0.5 rounded-xl bg-[#efe7ff] p-1.5 text-[#6d28d9]">
+                    <span class="grid h-9 w-9 grid-cols-2 gap-0.5 rounded-xl bg-[#f8e8ea] p-1.5 text-[#7a2030]">
                         <span class="rounded-[3px] bg-current" />
                         <span class="rounded-[3px] bg-current opacity-70" />
                         <span class="rounded-[3px] bg-current opacity-70" />
@@ -52,21 +52,21 @@ function active(path) {
                     <Link
                         href="/"
                         class="rounded-full px-3 py-1.5"
-                        :class="active('/') ? 'bg-white font-medium text-[#6d28d9] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                        :class="active('/') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
                         Proyek
                     </Link>
                     <Link
                         href="/buat"
                         class="rounded-full px-3 py-1.5"
-                        :class="active('/buat') ? 'bg-white font-medium text-[#6d28d9] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                        :class="active('/buat') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
                         Buat
                     </Link>
                     <Link
                         href="/pengaturan"
                         class="rounded-full px-3 py-1.5"
-                        :class="active('/pengaturan') ? 'bg-white font-medium text-[#6d28d9] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                        :class="active('/pengaturan') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
                         Pengaturan
                     </Link>

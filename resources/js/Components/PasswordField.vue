@@ -23,7 +23,7 @@ const visible = ref(false);
                 :type="visible ? 'text' : 'password'"
                 :autocomplete="autocomplete"
                 required
-                class="w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 pr-11 outline-none focus:border-[#c4b5fd] focus:ring-4 focus:ring-[#efe7ff]"
+                class="w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 pr-11 outline-none focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]"
             />
             <button
                 type="button"

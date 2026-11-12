@@ -1,6 +1,6 @@
 <script setup>
 import { Head } from '@inertiajs/vue3';
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import AppShell from '../Components/AppShell.vue';
 import PreviewCard from '../Components/PreviewCard.vue';
 import QrForm from '../Components/QrForm.vue';
@@ -16,8 +16,8 @@ const props = defineProps({
 const typeId = ref(props.types[0].id);
 const title = ref('');
 const fields = ref({});
-const style = reactive({ fg: '#111827', bg: '#ffffff', shape: 'square', ecc: 'M', margin: 4 });
-const smart = ref(false);
+const style = ref({ fg: '#111827', bg: '#ffffff', shape: 'square', ecc: 'M', margin: 4 });
+const smart = ref(true);
 const contentFile = ref(null);
 const logoFile = ref(null);
 const hasStoredFile = ref(false);
@@ -65,7 +65,7 @@ function snapshot() {
         type: typeId.value,
         title: title.value,
         fields: fields.value,
-        style: { ...style },
+        style: { ...style.value },
         removeFile: removeFile.value,
         logo: logoFile.value?.name ?? null,
         file: contentFile.value?.name ?? null,
@@ -120,7 +120,7 @@ function formData(extra = {}) {
     data.append('title', title.value);
     data.append('smart', usingSmart.value ? '1' : '0');
     data.append('fields', JSON.stringify(fields.value));
-    data.append('style', JSON.stringify({ ...style }));
+    data.append('style', JSON.stringify({ ...style.value }));
 
     if (logoFile.value) {
         data.append('logo', logoFile.value);
@@ -214,12 +214,8 @@ watch(typeId, (id, previous) => {
     hasStoredFile.value = false;
     storedFileName.value = '';
 
-    if (!props.editingCode && !saved.value) {
-        smart.value = Boolean(type.force_smart || type.smart_default);
-    }
-
     if (id === 'shaped') {
-        style.shape = 'dots';
+        style.value = { ...style.value, shape: 'dots' };
     }
 
     schedule();
@@ -227,11 +223,6 @@ watch(typeId, (id, previous) => {
 
 watch([fields, title, smart, contentFile, logoFile, removeFile], schedule, { deep: true });
 watch(style, schedule, { deep: true });
-watch(contentFile, (file) => {
-    if (file) {
-        smart.value = true;
-    }
-});
 
 async function save() {
     saving.value = true;
@@ -285,7 +276,7 @@ async function hydrate(secret) {
     typeId.value = data.type;
     title.value = data.title ?? '';
     fields.value = { ...blank(type), ...data.fields };
-    Object.assign(style, data.style ?? {});
+    style.value = { ...style.value, ...(data.style ?? {}) };
     smart.value = true;
     hasStoredFile.value = Boolean(data.has_file);
     hasStoredLogo.value = Boolean(data.has_logo);
@@ -320,7 +311,6 @@ function formatTime(value) {
 
 onMounted(async () => {
     if (!props.editingCode) {
-        smart.value = Boolean(currentType.value.force_smart || currentType.value.smart_default);
         ready.value = true;
 
         return;
@@ -352,9 +342,9 @@ onMounted(async () => {
         <div v-if="needsSecret" class="mx-auto max-w-md rounded-3xl border border-[#e6e7ee] bg-white p-6">
             <h1 class="text-lg font-semibold">Kunci QR</h1>
             <p class="mt-1 text-sm text-[#6d6a7a]">Kunci ini hanya tersimpan di browser yang membuat QR. Tempel jika kamu menyalinnya.</p>
-            <input v-model="secretInput" type="text" class="mt-4 w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#c4b5fd]" placeholder="Kunci rahasia" />
+            <input v-model="secretInput" type="text" class="mt-4 w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#e3b3ba]" placeholder="Kunci rahasia" />
             <p v-if="previewError" class="mt-2 text-sm text-[#9f1239]">{{ previewError }}</p>
-            <button type="button" class="mt-4 rounded-full bg-[#6d28d9] px-4 py-2.5 text-sm font-medium text-white" @click="unlock">Buka</button>
+            <button type="button" class="mt-4 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white" @click="unlock">Buka</button>
         </div>
         <div v-else class="grid gap-6">
             <TypeGrid v-model="typeId" :types="types" />
@@ -362,11 +352,9 @@ onMounted(async () => {
                 <QrForm
                     v-model:fields="fields"
                     v-model:title="title"
-                    v-model:smart="smart"
                     v-model:style="style"
                     v-model:remove-file="removeFile"
                     :type="currentType"
-                    :editing="Boolean(editingCode || saved)"
                     :has-stored-file="hasStoredFile"
                     :stored-file-name="storedFileName"
                     :has-stored-logo="hasStoredLogo"

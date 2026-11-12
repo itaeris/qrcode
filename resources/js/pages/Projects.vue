@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { Trash2 } from '@lucide/vue';
+import { LayoutGrid, List, Trash2 } from '@lucide/vue';
 import { onMounted, ref } from 'vue';
 import AppShell from '../Components/AppShell.vue';
 import { api } from '../lib/api';
@@ -11,6 +11,7 @@ const props = defineProps({
 });
 
 const items = ref(props.projects);
+const view = ref('cards');
 const pendingDelete = ref(null);
 const deleting = ref(false);
 const error = ref('');
@@ -62,13 +63,58 @@ function formatTime(value) {
                 <h1 class="text-2xl font-semibold tracking-tight">Proyek</h1>
                 <p class="mt-1 text-sm text-[#6d6a7a]">QR yang sudah disimpan.</p>
             </div>
-            <Link href="/buat" class="rounded-full bg-[#6d28d9] px-4 py-2 text-sm font-medium text-white">QR baru</Link>
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="flex rounded-full border border-[#e6e7ee] bg-white p-1" role="group" aria-label="Tampilan proyek">
+                    <button
+                        type="button"
+                        class="grid size-9 cursor-pointer place-items-center rounded-full"
+                        :class="view === 'list' ? 'bg-[#f8e8ea] text-[#7a2030]' : 'text-[#5c5a66]'"
+                        :aria-pressed="view === 'list'"
+                        aria-label="Daftar"
+                        @click="view = 'list'"
+                    >
+                        <List :size="16" />
+                    </button>
+                    <button
+                        type="button"
+                        class="grid size-9 cursor-pointer place-items-center rounded-full"
+                        :class="view === 'cards' ? 'bg-[#f8e8ea] text-[#7a2030]' : 'text-[#5c5a66]'"
+                        :aria-pressed="view === 'cards'"
+                        aria-label="Kartu"
+                        @click="view = 'cards'"
+                    >
+                        <LayoutGrid :size="16" />
+                    </button>
+                </div>
+                <Link href="/buat" class="rounded-full bg-[#7a2030] px-4 py-2 text-sm font-medium text-white">QR baru</Link>
+            </div>
         </div>
         <p v-if="error" class="mb-4 text-sm text-[#9f1239]">{{ error }}</p>
         <div v-if="items.length === 0" class="rounded-3xl border border-dashed border-[#d9dbe3] bg-white px-6 py-16 text-center">
             <p class="font-medium">Belum ada proyek</p>
             <p class="mt-1 text-sm text-[#6d6a7a]">Buat QR pertama, lalu simpan sebagai QR cerdas.</p>
-            <Link href="/buat" class="mt-4 inline-flex rounded-full bg-[#efe7ff] px-4 py-2 text-sm font-medium text-[#6d28d9]">Buat QR</Link>
+            <Link href="/buat" class="mt-4 inline-flex rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">Buat QR</Link>
+        </div>
+        <div v-else-if="view === 'list'" class="overflow-hidden rounded-3xl border border-[#e6e7ee] bg-white shadow-[0_1px_2px_rgba(20,18,31,0.04)]">
+            <div v-for="item in items" :key="item.code" class="flex flex-wrap items-center gap-3 border-b border-[#f0f1f5] px-4 py-3 last:border-b-0 sm:px-5">
+                <div class="min-w-0 flex-1">
+                    <div class="text-xs font-medium text-[#7a2030]">{{ item.type_label }}</div>
+                    <h2 class="truncate text-sm font-semibold">{{ item.title }}</h2>
+                    <p class="text-xs text-[#6d6a7a]">{{ item.scans }} pindaian · {{ formatTime(item.created_at) }}</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Kelola</Link>
+                    <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Buka</a>
+                    <button
+                        type="button"
+                        class="grid size-9 cursor-pointer place-items-center rounded-full border border-[#fecdd3] bg-[#fff1f2] text-[#9f1239] shadow-sm transition hover:bg-[#ffe4e6] active:scale-95"
+                        aria-label="Hapus"
+                        @click="askRemove(item)"
+                    >
+                        <Trash2 :size="16" />
+                    </button>
+                </div>
+            </div>
         </div>
         <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <article v-for="item in items" :key="item.code" class="relative flex flex-col rounded-3xl border border-[#e6e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(20,18,31,0.04)]">
@@ -81,12 +127,12 @@ function formatTime(value) {
                     <Trash2 :size="16" />
                 </button>
                 <div class="pr-8">
-                    <div class="text-xs font-medium text-[#6d28d9]">{{ item.type_label }}</div>
+                    <div class="text-xs font-medium text-[#7a2030]">{{ item.type_label }}</div>
                     <h2 class="mt-2 text-lg font-semibold tracking-tight">{{ item.title }}</h2>
                     <p class="mt-1 text-sm text-[#6d6a7a]">{{ item.scans }} pindaian · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="mt-5 flex flex-wrap gap-2">
-                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#efe7ff] px-3 py-1.5 text-sm font-medium text-[#6d28d9]">Kelola</Link>
+                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Kelola</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Buka</a>
                 </div>
             </article>
