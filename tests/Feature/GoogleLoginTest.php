@@ -22,6 +22,24 @@ class GoogleLoginTest extends TestCase
     }
 
     #[Test]
+    public function google_sign_in_asks_which_account_to_use(): void
+    {
+        config([
+            'services.google.client_id' => 'test-client',
+            'services.google.client_secret' => 'test-secret',
+            'services.google.redirect' => 'http://localhost:8000/login/google/callback',
+        ]);
+
+        $response = $this->get('/login/google');
+        $location = (string) $response->headers->get('Location');
+        parse_str((string) parse_url($location, PHP_URL_QUERY), $query);
+
+        $response->assertRedirect();
+        $this->assertStringStartsWith('https://accounts.google.com/', $location);
+        $this->assertSame('select_account', $query['prompt'] ?? null);
+    }
+
+    #[Test]
     public function a_registered_email_can_sign_in_with_google(): void
     {
         $user = User::factory()->create([
