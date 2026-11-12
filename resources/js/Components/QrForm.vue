@@ -19,9 +19,9 @@ const inputClass = 'w-full rounded-xl border border-[#e6e7ee] bg-white px-3 py-2
 const hexClass = 'min-w-0 flex-1 rounded-xl border border-[#e6e7ee] bg-white px-3 py-2.5 font-mono text-sm uppercase outline-none transition focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]';
 
 const shapes = [
-    { id: 'square', label: 'Kotak' },
-    { id: 'rounded', label: 'Bulat' },
-    { id: 'dots', label: 'Titik' },
+    { id: 'square', label: 'Square' },
+    { id: 'rounded', label: 'Rounded' },
+    { id: 'dots', label: 'Dots' },
 ];
 
 const fgText = ref(style.value.fg);
@@ -139,16 +139,16 @@ function onLogo(event) {
                             class="size-4 accent-[#9b2335]"
                             @change="setField(field.key, $event.target.checked)"
                         />
-                        Aktifkan
+                        Enable
                     </span>
                     <div v-else-if="field.type === 'links'" class="grid gap-2">
                         <div v-for="(link, index) in fields.links" :key="index" class="grid gap-2 sm:grid-cols-[160px_1fr_auto]">
                             <input :value="link.label" type="text" placeholder="Label" :class="inputClass" @input="setLink(index, 'label', $event.target.value)" />
                             <input :value="link.url" type="url" placeholder="https://" :class="inputClass" @input="setLink(index, 'url', $event.target.value)" />
-                            <button type="button" class="rounded-xl px-3 text-[#6d6a7a] hover:bg-[#f4f5f8]" @click="removeLink(index)">Hapus</button>
+                            <button type="button" class="rounded-xl px-3 text-[#6d6a7a] hover:bg-[#f4f5f8]" @click="removeLink(index)">Remove</button>
                         </div>
                         <button type="button" class="justify-self-start rounded-full bg-[#f8e8ea] px-3 py-1.5 text-[13px] font-medium text-[#7a2030]" @click="addLink">
-                            Tambah tautan
+                            Add link
                         </button>
                     </div>
                     <input
@@ -163,56 +163,56 @@ function onLogo(event) {
                     <span v-if="field.help" class="text-xs text-[#8a8794]">{{ field.help }}</span>
                 </label>
                 <div v-if="type.file" class="grid gap-1.5 text-sm">
-                    <span class="font-medium">Unggah berkas</span>
+                    <span class="font-medium">Upload file</span>
                     <label class="flex min-w-0 cursor-pointer items-center gap-3">
                         <input type="file" class="sr-only" :accept="type.accept || undefined" @change="onFile" />
-                        <span class="shrink-0 rounded-full bg-[#f8e8ea] px-3 py-1.5 text-[13px] font-medium text-[#7a2030]">Pilih berkas</span>
-                        <span class="truncate text-[#6d6a7a]">{{ contentName || (hasStoredFile && !removeFile ? storedFileName : 'Belum ada berkas') }}</span>
+                        <span class="shrink-0 rounded-full bg-[#f8e8ea] px-3 py-1.5 text-[13px] font-medium text-[#7a2030]">Choose file</span>
+                        <span class="truncate text-[#6d6a7a]">{{ contentName || (hasStoredFile && !removeFile ? storedFileName : 'No file yet') }}</span>
                     </label>
-                    <span v-if="hasStoredFile && !removeFile" class="text-xs text-[#8a8794]">Berkas tersimpan: {{ storedFileName }}</span>
+                    <span v-if="hasStoredFile && !removeFile" class="text-xs text-[#8a8794]">Saved file: {{ storedFileName }}</span>
                     <label v-if="hasStoredFile" class="flex cursor-pointer items-center gap-2 text-[#5c5a66]">
                         <input v-model="removeFile" type="checkbox" class="size-4 accent-[#9b2335]" />
-                        Hapus berkas tersimpan
+                        Remove saved file
                     </label>
                 </div>
             </div>
         </section>
 
         <section class="rounded-3xl border border-[#e6e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(20,18,31,0.04)]">
-            <h2 class="text-base font-semibold">Tampilan</h2>
+            <h2 class="text-base font-semibold">Appearance</h2>
             <div class="mt-4 grid gap-4 sm:grid-cols-2">
                 <label class="grid gap-1.5 text-sm">
-                    <span class="font-medium">Nama QR</span>
-                    <input v-model="title" type="text" maxlength="140" placeholder="Opsional, untuk daftar QR saya" :class="inputClass" />
+                    <span class="font-medium">QR name</span>
+                    <input v-model="title" type="text" maxlength="140" placeholder="Optional, shown in the project list" :class="inputClass" />
                 </label>
                 <div class="grid min-w-0 gap-1.5 text-sm">
                     <span class="font-medium">
-                        Logo tengah
+                        Center logo
                         <span v-if="type.logo_required" class="text-[#9b2335]">*</span>
                     </span>
                     <label class="flex min-w-0 cursor-pointer items-center gap-3">
                         <input type="file" class="sr-only" accept="image/png,image/jpeg,image/webp,image/gif" @change="onLogo" />
-                        <span class="shrink-0 rounded-full bg-[#f8e8ea] px-3 py-1.5 text-[13px] font-medium text-[#7a2030]">Pilih logo</span>
-                        <span class="truncate text-[#6d6a7a]">{{ logoName || (hasStoredLogo ? 'Logo tersimpan' : 'Belum ada berkas') }}</span>
+                        <span class="shrink-0 rounded-full bg-[#f8e8ea] px-3 py-1.5 text-[13px] font-medium text-[#7a2030]">Choose logo</span>
+                        <span class="truncate text-[#6d6a7a]">{{ logoName || (hasStoredLogo ? 'Saved logo' : 'No file yet') }}</span>
                     </label>
-                    <span v-if="hasStoredLogo && !logoName" class="text-xs text-[#8a8794]">Logo sebelumnya tetap dipakai sampai diganti.</span>
+                    <span v-if="hasStoredLogo && !logoName" class="text-xs text-[#8a8794]">The previous logo stays until you replace it.</span>
                 </div>
                 <div class="grid min-w-0 gap-1.5 text-sm">
-                    <span class="font-medium">Warna modul</span>
+                    <span class="font-medium">Module color</span>
                     <span class="flex min-w-0 items-center gap-2">
-                        <input :value="style.fg" type="color" class="color-well" aria-label="Pilih warna modul" @input="setStyle('fg', $event.target.value)" />
-                        <input :value="fgText" type="text" maxlength="7" spellcheck="false" :class="hexClass" aria-label="Kode warna modul" @input="onColorText('fg', $event)" @change="commitColorText('fg')" />
+                        <input :value="style.fg" type="color" class="color-well" aria-label="Choose module color" @input="setStyle('fg', $event.target.value)" />
+                        <input :value="fgText" type="text" maxlength="7" spellcheck="false" :class="hexClass" aria-label="Module color code" @input="onColorText('fg', $event)" @change="commitColorText('fg')" />
                     </span>
                 </div>
                 <div class="grid min-w-0 gap-1.5 text-sm">
-                    <span class="font-medium">Warna latar</span>
+                    <span class="font-medium">Background color</span>
                     <span class="flex min-w-0 items-center gap-2">
-                        <input :value="style.bg" type="color" class="color-well" aria-label="Pilih warna latar" @input="setStyle('bg', $event.target.value)" />
-                        <input :value="bgText" type="text" maxlength="7" spellcheck="false" :class="hexClass" aria-label="Kode warna latar" @input="onColorText('bg', $event)" @change="commitColorText('bg')" />
+                        <input :value="style.bg" type="color" class="color-well" aria-label="Choose background color" @input="setStyle('bg', $event.target.value)" />
+                        <input :value="bgText" type="text" maxlength="7" spellcheck="false" :class="hexClass" aria-label="Background color code" @input="onColorText('bg', $event)" @change="commitColorText('bg')" />
                     </span>
                 </div>
                 <div class="grid gap-1.5 text-sm">
-                    <span class="font-medium">Bentuk modul</span>
+                    <span class="font-medium">Module shape</span>
                     <div class="flex rounded-xl border border-[#e6e7ee] p-1">
                         <button
                             v-for="shape in shapes"

@@ -1,10 +1,12 @@
 <script setup>
 import { Link, router, usePage } from '@inertiajs/vue3';
-import { ChevronUp } from '@lucide/vue';
+import { ChevronDown, ChevronUp } from '@lucide/vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 
 const page = usePage();
 const user = computed(() => page.props.auth?.user ?? null);
+const profileOpen = ref(false);
+const profileMenu = ref(null);
 
 function logout() {
     router.post('/keluar');
@@ -15,8 +17,20 @@ function onScroll() {
     showTop.value = window.scrollY > 480;
 }
 
-onMounted(() => window.addEventListener('scroll', onScroll, { passive: true }));
-onBeforeUnmount(() => window.removeEventListener('scroll', onScroll));
+function closeProfile(event) {
+    if (profileMenu.value && !profileMenu.value.contains(event.target)) {
+        profileOpen.value = false;
+    }
+}
+
+onMounted(() => {
+    window.addEventListener('scroll', onScroll, { passive: true });
+    document.addEventListener('pointerdown', closeProfile);
+});
+onBeforeUnmount(() => {
+    window.removeEventListener('scroll', onScroll);
+    document.removeEventListener('pointerdown', closeProfile);
+});
 
 function toTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -54,25 +68,53 @@ function active(path) {
                         class="rounded-full px-3 py-1.5"
                         :class="active('/') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
-                        Proyek
+                        Projects
                     </Link>
                     <Link
                         href="/buat"
                         class="rounded-full px-3 py-1.5"
                         :class="active('/buat') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
-                        Buat
+                        Create
                     </Link>
                     <Link
-                        href="/pengaturan"
+                        href="/tautan"
                         class="rounded-full px-3 py-1.5"
-                        :class="active('/pengaturan') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                        :class="active('/tautan') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
-                        Pengaturan
+                        Links
                     </Link>
-                    <button type="button" class="rounded-full px-3 py-1.5 text-[#5c5a66] hover:text-[#1c1b22]" @click="logout">
-                        Keluar
-                    </button>
+                    <div ref="profileMenu" class="relative">
+                        <button
+                            type="button"
+                            class="inline-flex max-w-44 cursor-pointer items-center gap-1 rounded-full bg-white px-3 py-1.5 font-medium shadow-sm"
+                            :class="active('/pengaturan') ? 'text-[#7a2030]' : 'text-[#1c1b22]'"
+                            :aria-expanded="profileOpen"
+                            aria-haspopup="menu"
+                            @click="profileOpen = !profileOpen"
+                        >
+                            <span class="truncate">{{ user.name }}</span>
+                            <ChevronDown :size="16" class="shrink-0" />
+                        </button>
+                        <div v-if="profileOpen" class="absolute right-0 z-30 mt-2 w-52 overflow-hidden rounded-2xl border border-[#e6e7ee] bg-white p-1 shadow-lg" role="menu">
+                            <div class="px-3 py-2">
+                                <div class="truncate text-sm font-medium text-[#1c1b22]">{{ user.name }}</div>
+                                <div class="truncate text-xs text-[#6d6a7a]">{{ user.email }}</div>
+                            </div>
+                            <Link
+                                href="/pengaturan"
+                                class="block rounded-xl px-3 py-2 hover:bg-[#f8e8ea]"
+                                :class="active('/pengaturan') ? 'font-medium text-[#7a2030]' : 'text-[#1c1b22]'"
+                                role="menuitem"
+                                @click="profileOpen = false"
+                            >
+                                Settings
+                            </Link>
+                            <button type="button" class="block w-full cursor-pointer rounded-xl px-3 py-2 text-left text-[#9f1239] hover:bg-[#fff1f2]" role="menuitem" @click="logout">
+                                Log out
+                            </button>
+                        </div>
+                    </div>
                 </nav>
             </div>
         </header>
@@ -83,7 +125,7 @@ function active(path) {
             v-if="showTop"
             type="button"
             class="fixed right-5 bottom-5 grid h-10 w-10 place-items-center rounded-full border border-[#e6e7ee] bg-white text-[#5c5a66] shadow-md"
-            aria-label="Kembali ke atas"
+            aria-label="Back to top"
             @click="toTop"
         >
             <ChevronUp :size="18" />

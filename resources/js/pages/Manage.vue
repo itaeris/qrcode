@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/vue3';
 import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import AppShell from '../Components/AppShell.vue';
+import DateField from '../Components/DateField.vue';
 
 const props = defineProps({
     qr: { type: Object, required: true },
@@ -31,7 +32,7 @@ function monthName(date, index) {
         return '';
     }
 
-    return new Intl.DateTimeFormat('id-ID', { month: 'short' }).format(new Date(`${date}T00:00:00`));
+    return new Intl.DateTimeFormat('en', { month: 'short' }).format(new Date(`${date}T00:00:00`));
 }
 
 function scrollChart(direction) {
@@ -48,37 +49,31 @@ function apply() {
 }
 
 function formatTime(value) {
-    return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+    return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 </script>
 
 <template>
-    <Head :title="`Analisis ${qr.title}`" />
+    <Head :title="`${qr.title} analytics`" />
     <AppShell>
         <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
             <div>
-                <Link href="/" class="text-sm text-[#7a2030]">Proyek</Link>
+                <Link href="/" class="text-sm text-[#7a2030]">Projects</Link>
                 <h1 class="mt-1 text-2xl font-semibold tracking-tight">{{ qr.title }}</h1>
-                <p class="mt-1 text-sm text-[#6d6a7a]">{{ qr.type_label }} · {{ qr.scans }} pindaian</p>
+                <p class="mt-1 text-sm text-[#6d6a7a]">{{ qr.type_label }} · {{ qr.scans }} scans</p>
             </div>
             <Link :href="qr.edit_url" class="rounded-full bg-[#7a2030] px-4 py-2 text-sm font-medium text-white">Edit</Link>
         </div>
-        <form class="mb-4 flex flex-wrap items-end gap-3 rounded-3xl border border-[#e6e7ee] bg-white p-4" @submit.prevent="apply">
-            <label class="grid gap-1 text-sm">
-                <span class="font-medium">Dari</span>
-                <input v-model="dari" type="date" required class="rounded-xl border border-[#e6e7ee] px-3 py-2 outline-none focus:border-[#e3b3ba]" />
-            </label>
-            <label class="grid gap-1 text-sm">
-                <span class="font-medium">Sampai</span>
-                <input v-model="sampai" type="date" required class="rounded-xl border border-[#e6e7ee] px-3 py-2 outline-none focus:border-[#e3b3ba]" />
-            </label>
-            <button type="submit" class="rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">Lihat</button>
-            <p class="text-sm text-[#6d6a7a]">{{ total }} pindaian pada rentang ini</p>
+        <form class="relative z-10 mb-4 flex flex-wrap items-end gap-3 rounded-3xl border border-[#e6e7ee] bg-white p-4" @submit.prevent="apply">
+            <DateField v-model="dari" label="From" />
+            <DateField v-model="sampai" label="To" />
+            <button type="submit" class="rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">View</button>
+            <p class="text-sm text-[#6d6a7a]">{{ total }} scans in this range</p>
         </form>
         <section class="rounded-3xl border border-[#e6e7ee] bg-white p-5">
-            <h2 class="text-base font-semibold">Pindaian per tanggal</h2>
+            <h2 class="text-base font-semibold">Scans by date</h2>
             <div class="mt-4 flex items-center gap-2">
-                <button type="button" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-[#e6e7ee] text-[#7a2030]" aria-label="Tanggal sebelumnya" @click="scrollChart(-1)">
+                <button type="button" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-[#e6e7ee] text-[#7a2030]" aria-label="Earlier dates" @click="scrollChart(-1)">
                     <ChevronLeft :size="16" />
                 </button>
                 <div ref="scroller" class="chart-scroll min-w-0 flex-1 overflow-x-auto">
@@ -93,15 +88,15 @@ function formatTime(value) {
                         </div>
                     </div>
                 </div>
-                <button type="button" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-[#e6e7ee] text-[#7a2030]" aria-label="Tanggal berikutnya" @click="scrollChart(1)">
+                <button type="button" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-[#e6e7ee] text-[#7a2030]" aria-label="Later dates" @click="scrollChart(1)">
                     <ChevronRight :size="16" />
                 </button>
             </div>
         </section>
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <section class="rounded-3xl border border-[#e6e7ee] bg-white p-5">
-                <h2 class="text-base font-semibold">Lokasi</h2>
-                <p v-if="places.length === 0" class="mt-3 text-sm text-[#6d6a7a]">Belum ada pindaian pada tanggal ini.</p>
+                <h2 class="text-base font-semibold">Locations</h2>
+                <p v-if="places.length === 0" class="mt-3 text-sm text-[#6d6a7a]">No scans in this date range.</p>
                 <ul v-else class="mt-4 grid gap-3">
                     <li v-for="place in places" :key="place.name">
                         <div class="mb-1 flex justify-between gap-3 text-sm">
@@ -115,8 +110,8 @@ function formatTime(value) {
                 </ul>
             </section>
             <section class="rounded-3xl border border-[#e6e7ee] bg-white p-5">
-                <h2 class="text-base font-semibold">Siapa yang memindai</h2>
-                <p v-if="scans.length === 0" class="mt-3 text-sm text-[#6d6a7a]">Belum ada pindaian pada tanggal ini.</p>
+                <h2 class="text-base font-semibold">Who scanned</h2>
+                <p v-if="scans.length === 0" class="mt-3 text-sm text-[#6d6a7a]">No scans in this date range.</p>
                 <ul v-else class="mt-3 divide-y divide-[#f0f1f5]">
                     <li v-for="(scan, index) in scans" :key="`${scan.at}-${index}`" class="grid gap-0.5 py-3 text-sm">
                         <span class="font-medium">{{ scan.device }}</span>

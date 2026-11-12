@@ -43,7 +43,7 @@ function checkIn() {
             <img v-if="presentation.media === 'image' && qr.file_url" :src="qr.file_url" :alt="qr.title" class="mt-5 max-h-80 w-full rounded-2xl object-contain" />
             <audio v-else-if="presentation.media === 'audio' && qr.file_url" :src="qr.file_url" controls class="mt-5 w-full" />
             <video v-else-if="presentation.media === 'video' && qr.file_url" :src="qr.file_url" controls class="mt-5 w-full rounded-2xl" />
-            <iframe v-else-if="presentation.media === 'pdf' && qr.file_url" :src="qr.file_url" class="mt-5 h-96 w-full rounded-2xl border border-[#e6e7ee]" title="Pratinjau PDF" />
+            <iframe v-else-if="presentation.media === 'pdf' && qr.file_url" :src="qr.file_url" class="mt-5 h-96 w-full rounded-2xl border border-[#e6e7ee]" title="PDF preview" />
             <div v-if="presentation.actions?.length" class="mt-5 grid gap-2">
                 <a
                     v-for="action in presentation.actions"
@@ -55,17 +55,17 @@ function checkIn() {
                 </a>
             </div>
             <form v-if="presentation.check_in" class="mt-5 grid gap-2" @submit.prevent="checkIn">
-                <label class="text-sm font-medium" for="attendee">Nama</label>
-                <input id="attendee" v-model="form.name" type="text" maxlength="80" required class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#e3b3ba]" placeholder="Nama kamu" />
+                <label class="text-sm font-medium" for="attendee">Name</label>
+                <input id="attendee" v-model="form.name" type="text" maxlength="80" required class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#e3b3ba]" placeholder="Your name" />
                 <p v-if="form.errors.name" class="text-sm text-[#9f1239]">{{ form.errors.name }}</p>
                 <p v-if="success" class="text-sm text-[#166534]">{{ success }}</p>
                 <button type="submit" class="rounded-full bg-[#111827] px-4 py-2.5 text-sm font-medium text-white" :disabled="form.processing">
-                    Catat kehadiran
+                    Check in
                 </button>
             </form>
         </article>
         <p v-if="page.props.auth?.user" class="mt-6 text-center text-sm text-[#8a8794]">
-            <Link href="/buat" class="text-[#7a2030]">Buat QR sendiri</Link>
+            <Link href="/buat" class="text-[#7a2030]">Create your own QR</Link>
         </p>
     </AppShell>
 </template>

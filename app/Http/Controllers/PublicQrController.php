@@ -55,7 +55,7 @@ class PublicQrController extends Controller
         ];
 
         if ($download || ! $this->inline($link->file_mime)) {
-            return Storage::disk('local')->download($link->file_path, $link->file_name ?: 'berkas', $headers);
+            return Storage::disk('local')->download($link->file_path, $link->file_name ?: 'file', $headers);
         }
 
         return Storage::disk('local')->response($link->file_path, $link->file_name, $headers);
@@ -69,7 +69,7 @@ class PublicQrController extends Controller
 
         return response($built->text, 200, [
             'Content-Type' => 'text/vcard; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="kontak.vcf"',
+            'Content-Disposition' => 'attachment; filename="contact.vcf"',
         ]);
     }
 
@@ -81,7 +81,7 @@ class PublicQrController extends Controller
 
         return response($built->text, 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'attachment; filename="acara.ics"',
+            'Content-Disposition' => 'attachment; filename="event.ics"',
         ]);
     }
 
@@ -93,7 +93,7 @@ class PublicQrController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:80'],
         ], [
-            'name.required' => 'Nama wajib diisi.',
+            'name.required' => 'Name is required.',
         ]);
 
         Attendance::query()->create([
@@ -101,7 +101,7 @@ class PublicQrController extends Controller
             'name' => trim($data['name']),
         ]);
 
-        return back()->with('success', 'Kehadiran tercatat.');
+        return back()->with('success', 'Attendance recorded.');
     }
 
     private function find(string $code): QrLink
@@ -135,15 +135,15 @@ class PublicQrController extends Controller
         $actions = $presentation['actions'] ?? [];
 
         if ($link->type === 'vcard') {
-            $actions[] = ['label' => 'Simpan kontak', 'href' => route('qr.vcard', $link->code)];
+            $actions[] = ['label' => 'Save contact', 'href' => route('qr.vcard', $link->code)];
         }
 
         if ($link->type === 'calendar') {
-            $actions[] = ['label' => 'Tambah ke kalender', 'href' => route('qr.calendar', $link->code)];
+            $actions[] = ['label' => 'Add to calendar', 'href' => route('qr.calendar', $link->code)];
         }
 
         if ($link->file_path) {
-            $actions[] = ['label' => 'Unduh berkas', 'href' => route('qr.file', ['code' => $link->code, 'unduh' => 1])];
+            $actions[] = ['label' => 'Download file', 'href' => route('qr.file', ['code' => $link->code, 'unduh' => 1])];
             $presentation['media'] = match ($link->type) {
                 'image', 'png' => 'image',
                 'audio' => 'audio',

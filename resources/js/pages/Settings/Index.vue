@@ -40,49 +40,49 @@ function addUser() {
 </script>
 
 <template>
-    <Head title="Pengaturan" />
+    <Head title="Settings" />
     <AppShell>
         <div class="mb-6">
-            <h1 class="text-2xl font-semibold tracking-tight">Pengaturan</h1>
-            <p class="mt-1 text-sm text-[#6d6a7a]">Ganti kata sandi dan tambah pengguna.</p>
+            <h1 class="text-2xl font-semibold tracking-tight">Settings</h1>
+            <p class="mt-1 text-sm text-[#6d6a7a]">Change your password and add users.</p>
         </div>
         <p v-if="success" class="mb-4 rounded-2xl bg-[#ecfdf3] px-4 py-3 text-sm text-[#166534]">{{ success }}</p>
         <div class="grid gap-4 lg:grid-cols-2">
             <form class="rounded-3xl border border-[#e6e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(20,18,31,0.04)] sm:p-6" @submit.prevent="updatePassword">
-                <h2 class="text-lg font-semibold tracking-tight">Ganti kata sandi</h2>
-                <p class="mt-1 text-sm text-[#6d6a7a]">Berlaku untuk akun yang sedang masuk.</p>
+                <h2 class="text-lg font-semibold tracking-tight">Change password</h2>
+                <p class="mt-1 text-sm text-[#6d6a7a]">Applies to the account you are using.</p>
                 <div class="mt-5 grid gap-4">
                     <PasswordField
                         id="current-password"
                         v-model="passwordForm.current_password"
-                        label="Kata sandi saat ini"
+                        label="Current password"
                         autocomplete="current-password"
                         :error="passwordForm.errors.current_password"
                     />
                     <PasswordField
                         id="new-password"
                         v-model="passwordForm.password"
-                        label="Kata sandi baru"
+                        label="New password"
                         autocomplete="new-password"
                         :error="passwordForm.errors.password"
                     />
                     <PasswordField
                         id="confirm-password"
                         v-model="passwordForm.password_confirmation"
-                        label="Ulangi kata sandi baru"
+                        label="Confirm new password"
                         autocomplete="new-password"
                     />
                 </div>
                 <button type="submit" class="mt-6 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="passwordForm.processing">
-                    {{ passwordForm.processing ? 'Menyimpan…' : 'Simpan kata sandi' }}
+                    {{ passwordForm.processing ? 'Saving…' : 'Save password' }}
                 </button>
             </form>
             <form class="rounded-3xl border border-[#e6e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(20,18,31,0.04)] sm:p-6" @submit.prevent="addUser">
-                <h2 class="text-lg font-semibold tracking-tight">Tambah pengguna</h2>
-                <p class="mt-1 text-sm text-[#6d6a7a]">Pengguna baru bisa langsung masuk.</p>
+                <h2 class="text-lg font-semibold tracking-tight">Add user</h2>
+                <p class="mt-1 text-sm text-[#6d6a7a]">New users can sign in right away.</p>
                 <div class="mt-5 grid gap-4">
                     <label class="grid gap-1.5 text-sm">
-                        <span class="font-medium">Nama</span>
+                        <span class="font-medium">Name</span>
                         <input
                             v-model="userForm.name"
                             type="text"
@@ -100,31 +100,31 @@ function addUser() {
                             autocomplete="off"
                             required
                             class="rounded-xl border border-[#e6e7ee] px-3 py-2.5 outline-none focus:border-[#e3b3ba] focus:ring-4 focus:ring-[#f8e8ea]"
-                            placeholder="nama@contoh.com"
+                            placeholder="name@example.com"
                         />
                         <span v-if="userForm.errors.email" class="text-[#9f1239]">{{ userForm.errors.email }}</span>
                     </label>
                     <PasswordField
                         id="user-password"
                         v-model="userForm.password"
-                        label="Kata sandi"
+                        label="Password"
                         autocomplete="new-password"
                         :error="userForm.errors.password"
                     />
                     <PasswordField
                         id="user-password-confirmation"
                         v-model="userForm.password_confirmation"
-                        label="Ulangi kata sandi"
+                        label="Confirm password"
                         autocomplete="new-password"
                     />
                 </div>
                 <button type="submit" class="mt-6 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white disabled:opacity-50" :disabled="userForm.processing">
-                    {{ userForm.processing ? 'Menambahkan…' : 'Tambah pengguna' }}
+                    {{ userForm.processing ? 'Adding…' : 'Add user' }}
                 </button>
             </form>
         </div>
         <section class="mt-4 rounded-3xl border border-[#e6e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(20,18,31,0.04)] sm:p-6">
-            <h2 class="text-lg font-semibold tracking-tight">Pengguna</h2>
+            <h2 class="text-lg font-semibold tracking-tight">Users</h2>
             <ul class="mt-4 divide-y divide-[#eceef3]">
                 <li v-for="user in users" :key="user.email" class="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
                     <span class="font-medium">{{ user.name }}</span>

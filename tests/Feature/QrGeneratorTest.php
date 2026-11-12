@@ -70,7 +70,8 @@ class QrGeneratorTest extends TestCase
         $this->get('/')->assertOk()->assertInertia(fn ($page) => $page
             ->component('Projects')
             ->has('projects', 1)
-            ->where('projects.0.title', 'Situs'));
+            ->where('projects.0.title', 'Situs')
+            ->where('projects.0.svg', fn (string $svg) => str_starts_with($svg, '<svg')));
 
         $code = $response->json('code');
 

@@ -25,10 +25,10 @@ const visible = computed(() => {
 <template>
     <section>
         <div class="mb-3 flex items-center justify-between gap-3">
-            <h1 class="text-sm font-medium text-[#6d6a7a]">Pilih jenis QR</h1>
+            <h1 class="text-sm font-medium text-[#6d6a7a]">Choose a QR type</h1>
             <label class="flex h-9 w-full max-w-[220px] items-center gap-2 rounded-full border border-[#e6e7ee] bg-white px-3 text-sm text-[#6d6a7a] shadow-sm">
                 <Search :size="15" />
-                <input v-model="query" type="search" placeholder="Cari jenis" class="w-full bg-transparent outline-none placeholder:text-[#a1a0ab]" />
+                <input v-model="query" type="search" placeholder="Search types" class="w-full bg-transparent outline-none placeholder:text-[#a1a0ab]" />
             </label>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -47,6 +47,6 @@ const visible = computed(() => {
                 <span>{{ type.label }}</span>
             </button>
         </div>
-        <p v-if="visible.length === 0" class="mt-4 text-sm text-[#6d6a7a]">Tidak ada jenis yang cocok.</p>
+        <p v-if="visible.length === 0" class="mt-4 text-sm text-[#6d6a7a]">No matching type.</p>
     </section>
 </template>

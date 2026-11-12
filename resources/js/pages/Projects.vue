@@ -1,9 +1,10 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { LayoutGrid, List, Trash2 } from '@lucide/vue';
-import { onMounted, ref } from 'vue';
+import { ChevronDown, Download, LayoutGrid, List, Trash2 } from '@lucide/vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import AppShell from '../Components/AppShell.vue';
 import { api } from '../lib/api';
+import { downloadPng } from '../lib/download';
 import { forget, loadMine } from '../lib/storage';
 
 const props = defineProps({
@@ -15,13 +16,24 @@ const view = ref('cards');
 const pendingDelete = ref(null);
 const deleting = ref(false);
 const error = ref('');
+const createOpen = ref(false);
+const createMenu = ref(null);
 
 onMounted(() => {
     const local = loadMine();
     const codes = new Set(items.value.map((item) => item.code));
 
     local.filter((item) => !codes.has(item.code)).forEach((item) => forget(item.code));
+    document.addEventListener('pointerdown', closeCreateMenu);
 });
+
+onBeforeUnmount(() => document.removeEventListener('pointerdown', closeCreateMenu));
+
+function closeCreateMenu(event) {
+    if (createMenu.value && !createMenu.value.contains(event.target)) {
+        createOpen.value = false;
+    }
+}
 
 function askRemove(item) {
     pendingDelete.value = item;
@@ -51,26 +63,48 @@ async function confirmRemove() {
 }
 
 function formatTime(value) {
-    return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(value));
+    return new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(value));
+}
+
+function qrSvg(svg) {
+    return typeof svg === 'string' && svg.startsWith('<svg') && !svg.includes('<script') ? svg : '';
+}
+
+async function download(item) {
+    const svg = qrSvg(item.svg);
+
+    if (!svg) {
+        error.value = 'This QR cannot be downloaded yet.';
+
+        return;
+    }
+
+    error.value = '';
+
+    try {
+        await downloadPng(svg, 512, `qr-${item.code}.png`, item.background || '#ffffff');
+    } catch {
+        error.value = 'This browser could not create the PNG.';
+    }
 }
 </script>
 
 <template>
-    <Head title="Proyek" />
+    <Head title="Projects" />
     <AppShell>
         <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
             <div>
-                <h1 class="text-2xl font-semibold tracking-tight">Proyek</h1>
-                <p class="mt-1 text-sm text-[#6d6a7a]">QR yang sudah disimpan.</p>
+                <h1 class="text-2xl font-semibold tracking-tight">Projects</h1>
+                <p class="mt-1 text-sm text-[#6d6a7a]">Saved QR codes.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
-                <div class="flex rounded-full border border-[#e6e7ee] bg-white p-1" role="group" aria-label="Tampilan proyek">
+                <div class="flex rounded-full border border-[#e6e7ee] bg-white p-1" role="group" aria-label="Project view">
                     <button
                         type="button"
                         class="grid size-9 cursor-pointer place-items-center rounded-full"
                         :class="view === 'list' ? 'bg-[#f8e8ea] text-[#7a2030]' : 'text-[#5c5a66]'"
                         :aria-pressed="view === 'list'"
-                        aria-label="Daftar"
+                        aria-label="List"
                         @click="view = 'list'"
                     >
                         <List :size="16" />
@@ -80,36 +114,51 @@ function formatTime(value) {
                         class="grid size-9 cursor-pointer place-items-center rounded-full"
                         :class="view === 'cards' ? 'bg-[#f8e8ea] text-[#7a2030]' : 'text-[#5c5a66]'"
                         :aria-pressed="view === 'cards'"
-                        aria-label="Kartu"
+                        aria-label="Cards"
                         @click="view = 'cards'"
                     >
                         <LayoutGrid :size="16" />
                     </button>
                 </div>
-                <Link href="/buat" class="rounded-full bg-[#7a2030] px-4 py-2 text-sm font-medium text-white">QR baru</Link>
+                <div ref="createMenu" class="relative">
+                    <button
+                        type="button"
+                        class="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-[#7a2030] px-4 py-2 text-sm font-medium text-white"
+                        :aria-expanded="createOpen"
+                        aria-haspopup="menu"
+                        @click="createOpen = !createOpen"
+                    >
+                        New
+                        <ChevronDown :size="16" />
+                    </button>
+                    <div v-if="createOpen" class="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-2xl border border-[#e6e7ee] bg-white p-1 shadow-lg" role="menu">
+                        <Link href="/buat" class="block rounded-xl px-3 py-2 text-sm hover:bg-[#f8e8ea]" role="menuitem" @click="createOpen = false">New QR</Link>
+                        <Link href="/tautan" class="block rounded-xl px-3 py-2 text-sm hover:bg-[#f8e8ea]" role="menuitem" @click="createOpen = false">Short link</Link>
+                    </div>
+                </div>
             </div>
         </div>
         <p v-if="error" class="mb-4 text-sm text-[#9f1239]">{{ error }}</p>
         <div v-if="items.length === 0" class="rounded-3xl border border-dashed border-[#d9dbe3] bg-white px-6 py-16 text-center">
-            <p class="font-medium">Belum ada proyek</p>
-            <p class="mt-1 text-sm text-[#6d6a7a]">Buat QR pertama, lalu simpan sebagai QR cerdas.</p>
-            <Link href="/buat" class="mt-4 inline-flex rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">Buat QR</Link>
+            <p class="font-medium">No projects yet</p>
+            <p class="mt-1 text-sm text-[#6d6a7a]">Create your first QR, then save it.</p>
+            <Link href="/buat" class="mt-4 inline-flex rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">Create QR</Link>
         </div>
         <div v-else-if="view === 'list'" class="overflow-hidden rounded-3xl border border-[#e6e7ee] bg-white shadow-[0_1px_2px_rgba(20,18,31,0.04)]">
             <div v-for="item in items" :key="item.code" class="flex flex-wrap items-center gap-3 border-b border-[#f0f1f5] px-4 py-3 last:border-b-0 sm:px-5">
                 <div class="min-w-0 flex-1">
                     <div class="text-xs font-medium text-[#7a2030]">{{ item.type_label }}</div>
                     <h2 class="truncate text-sm font-semibold">{{ item.title }}</h2>
-                    <p class="text-xs text-[#6d6a7a]">{{ item.scans }} pindaian · {{ formatTime(item.created_at) }}</p>
+                    <p class="text-xs text-[#6d6a7a]">{{ item.scans }} scans · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Kelola</Link>
+                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
                     <Link :href="`/kelola/${item.code}/ubah`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
-                    <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Buka</a>
+                    <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Open</a>
                     <button
                         type="button"
                         class="grid size-9 cursor-pointer place-items-center rounded-full border border-[#fecdd3] bg-[#fff1f2] text-[#9f1239] shadow-sm transition hover:bg-[#ffe4e6] active:scale-95"
-                        aria-label="Hapus"
+                        aria-label="Delete"
                         @click="askRemove(item)"
                     >
                         <Trash2 :size="16" />
@@ -122,36 +171,41 @@ function formatTime(value) {
                 <button
                     type="button"
                     class="absolute top-4 right-4 grid size-9 cursor-pointer place-items-center rounded-full border border-[#fecdd3] bg-[#fff1f2] text-[#9f1239] shadow-sm transition hover:bg-[#ffe4e6] active:scale-95"
-                    aria-label="Hapus"
+                    aria-label="Delete"
                     @click="askRemove(item)"
                 >
                     <Trash2 :size="16" />
                 </button>
-                <div class="pr-8">
+                <div class="qr-preview mr-10 aspect-square max-w-40 overflow-hidden rounded-2xl border border-[#f0f1f5] bg-[#fafafb] p-2" v-html="qrSvg(item.svg)" />
+                <div class="mt-4 pr-2">
                     <div class="text-xs font-medium text-[#7a2030]">{{ item.type_label }}</div>
                     <h2 class="mt-2 text-lg font-semibold tracking-tight">{{ item.title }}</h2>
-                    <p class="mt-1 text-sm text-[#6d6a7a]">{{ item.scans }} pindaian · {{ formatTime(item.created_at) }}</p>
+                    <p class="mt-1 text-sm text-[#6d6a7a]">{{ item.scans }} scans · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="mt-5 flex flex-wrap gap-2">
-                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Kelola</Link>
+                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
                     <Link :href="`/kelola/${item.code}/ubah`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
-                    <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Buka</a>
+                    <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Open</a>
+                    <button type="button" class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm" @click="download(item)">
+                        <Download :size="15" />
+                        Download
+                    </button>
                 </div>
             </article>
         </div>
         <div v-if="pendingDelete" class="fixed inset-0 z-30 grid place-items-center bg-[#1c1b22]/40 px-4" @click.self="pendingDelete = null">
             <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
-                <h2 id="delete-title" class="text-lg font-semibold">Hapus proyek?</h2>
+                <h2 id="delete-title" class="text-lg font-semibold">Delete project?</h2>
                 <p class="mt-2 text-sm leading-6 text-[#6d6a7a]">
                     <span class="font-medium text-[#1c1b22]">{{ pendingDelete.title }}</span>
-                    akan dihapus. Tautan QR-nya tidak bisa dipakai lagi.
+                    will be deleted. Its QR link will stop working.
                 </p>
                 <div class="mt-5 flex justify-end gap-2">
                     <button type="button" class="cursor-pointer rounded-full border border-[#e6e7ee] px-4 py-2 text-sm font-medium" :disabled="deleting" @click="pendingDelete = null">
-                        Batal
+                        Cancel
                     </button>
                     <button type="button" class="cursor-pointer rounded-full bg-[#9f1239] px-4 py-2 text-sm font-medium text-white disabled:opacity-50" :disabled="deleting" @click="confirmRemove">
-                        {{ deleting ? 'Menghapus…' : 'Hapus' }}
+                        {{ deleting ? 'Deleting…' : 'Delete' }}
                     </button>
                 </div>
             </div>

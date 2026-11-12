@@ -6,6 +6,7 @@ use App\Models\QrLink;
 use App\Models\QrScan;
 use App\Qr\Catalog;
 use App\Qr\Visitor;
+use App\Services\QrPublisher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -13,20 +14,30 @@ use Inertia\Response;
 
 class GeneratorController extends Controller
 {
-    public function index(): Response
+    public function index(QrPublisher $publisher): Response
     {
         $projects = QrLink::query()
             ->latest()
-            ->get(['code', 'type', 'title', 'scans', 'created_at'])
-            ->map(fn (QrLink $link): array => [
-                'code' => $link->code,
-                'title' => $link->title,
-                'type' => $link->type,
-                'type_label' => Catalog::find($link->type)['label'] ?? $link->type,
-                'scans' => $link->scans,
-                'url' => route('qr.show', $link->code),
-                'created_at' => $link->created_at?->toIso8601String(),
-            ])
+            ->get()
+            ->map(function (QrLink $link) use ($publisher): array {
+                try {
+                    $svg = $publisher->svgFor($link);
+                } catch (\Throwable) {
+                    $svg = null;
+                }
+
+                return [
+                    'code' => $link->code,
+                    'title' => $link->title,
+                    'type' => $link->type,
+                    'type_label' => Catalog::find($link->type)['label'] ?? $link->type,
+                    'scans' => $link->scans,
+                    'url' => route('qr.show', $link->code),
+                    'created_at' => $link->created_at?->toIso8601String(),
+                    'svg' => $svg,
+                    'background' => $link->style['bg'] ?? '#ffffff',
+                ];
+            })
             ->values();
 
         return Inertia::render('Projects', [
@@ -74,7 +85,7 @@ class GeneratorController extends Controller
             $key = $cursor->toDateString();
             $days[] = [
                 'date' => $key,
-                'label' => $cursor->locale('id')->translatedFormat('d MMM'),
+                'label' => $cursor->locale('en')->translatedFormat('d MMM'),
                 'count' => (int) ($byDay[$key] ?? 0),
             ];
             $cursor->addDay();
@@ -149,6 +160,6 @@ class GeneratorController extends Controller
     {
         $parts = array_values(array_filter([$scan->city, $scan->region, $scan->country]));
 
-        return $parts === [] ? 'Tidak diketahui' : implode(', ', $parts);
+        return $parts === [] ? 'Unknown' : implode(', ', $parts);
     }
 }

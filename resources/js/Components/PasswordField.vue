@@ -28,7 +28,7 @@ const visible = ref(false);
             <button
                 type="button"
                 class="absolute inset-y-0 right-0 grid w-11 place-items-center text-[#6d6a7a]"
-                :aria-label="visible ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'"
+                :aria-label="visible ? 'Hide password' : 'Show password'"
                 @click="visible = !visible"
             >
                 <EyeOff v-if="visible" :size="16" />

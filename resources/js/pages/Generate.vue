@@ -306,7 +306,7 @@ function formatTime(value) {
         return '';
     }
 
-    return new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
+    return new Intl.DateTimeFormat('en', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value));
 }
 
 onMounted(async () => {
@@ -337,14 +337,14 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Head :title="editingCode ? 'Kelola QR' : 'Buat QR'" />
+    <Head :title="editingCode ? 'Edit QR' : 'Create QR'" />
     <AppShell>
         <div v-if="needsSecret" class="mx-auto max-w-md rounded-3xl border border-[#e6e7ee] bg-white p-6">
-            <h1 class="text-lg font-semibold">Kunci QR</h1>
-            <p class="mt-1 text-sm text-[#6d6a7a]">Kunci ini hanya tersimpan di browser yang membuat QR. Tempel jika kamu menyalinnya.</p>
-            <input v-model="secretInput" type="text" class="mt-4 w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#e3b3ba]" placeholder="Kunci rahasia" />
+            <h1 class="text-lg font-semibold">QR key</h1>
+            <p class="mt-1 text-sm text-[#6d6a7a]">This key is stored only in the browser that created the QR. Paste it if you copied it.</p>
+            <input v-model="secretInput" type="text" class="mt-4 w-full rounded-xl border border-[#e6e7ee] px-3 py-2.5 text-sm outline-none focus:border-[#e3b3ba]" placeholder="Secret key" />
             <p v-if="previewError" class="mt-2 text-sm text-[#9f1239]">{{ previewError }}</p>
-            <button type="button" class="mt-4 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white" @click="unlock">Buka</button>
+            <button type="button" class="mt-4 rounded-full bg-[#7a2030] px-4 py-2.5 text-sm font-medium text-white" @click="unlock">Open</button>
         </div>
         <div v-else class="grid gap-6">
             <TypeGrid v-model="typeId" :types="types" />
@@ -376,7 +376,7 @@ onMounted(async () => {
                 />
             </div>
             <section v-if="attendances.length" class="rounded-3xl border border-[#e6e7ee] bg-white p-5">
-                <h2 class="text-base font-semibold">Kehadiran</h2>
+                <h2 class="text-base font-semibold">Attendance</h2>
                 <ul class="mt-3 divide-y divide-[#f0f1f5] text-sm">
                     <li v-for="(person, index) in attendances" :key="index" class="flex items-center justify-between py-2">
                         <span>{{ person.name }}</span>

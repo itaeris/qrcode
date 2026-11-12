@@ -125,7 +125,7 @@ class QrPublisher
             report($exception);
 
             throw ValidationException::withMessages([
-                'fields' => 'QR tidak bisa dibuat dari data ini. Perkecil isinya atau ubah tingkat koreksi.',
+                'fields' => 'A QR cannot be built from this data. Shorten the content.',
             ]);
         }
     }

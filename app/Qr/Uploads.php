@@ -28,7 +28,7 @@ class Uploads
             'pptx' => ['required', 'file', 'mimes:ppt,pptx', 'max:20480'],
             'excel' => ['required', 'file', 'mimes:xls,xlsx,csv', 'max:15360'],
             'file' => ['required', 'file', 'max:20480'],
-            default => throw ValidationException::withMessages(['file' => 'Jenis ini tidak menerima berkas.']),
+            default => throw ValidationException::withMessages(['file' => 'This type does not accept a file.']),
         };
 
         Validator::make(['file' => $file], ['file' => $rules])->validate();
@@ -36,7 +36,7 @@ class Uploads
         $blocked = ['php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'exe', 'sh', 'bat', 'cmd', 'com', 'cgi', 'htaccess', 'js', 'mjs', 'html', 'htm', 'svg', 'xml'];
 
         if (in_array($extension, $blocked, true)) {
-            throw ValidationException::withMessages(['file' => 'Jenis berkas ini tidak diizinkan.']);
+            throw ValidationException::withMessages(['file' => 'This file type is not allowed.']);
         }
     }
 

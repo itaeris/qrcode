@@ -28,7 +28,7 @@ class QrInput
         $type = Catalog::find($typeId);
 
         if (! $type) {
-            throw ValidationException::withMessages(['type' => 'Jenis QR tidak dikenal.']);
+            throw ValidationException::withMessages(['type' => 'Unknown QR type.']);
         }
 
         $fields = self::decode($request->input('fields', []), 'fields');
@@ -187,7 +187,7 @@ class QrInput
 
             if (! $ok) {
                 throw ValidationException::withMessages([
-                    'fields' => 'Lengkapi data yang diminta untuk jenis ini.',
+                    'fields' => 'Fill in the details required for this type.',
                 ]);
             }
         }
@@ -204,14 +204,14 @@ class QrInput
 
             if ($empty) {
                 throw ValidationException::withMessages([
-                    'fields.'.$field['key'] => $field['label'].' wajib diisi.',
+                    'fields.'.$field['key'] => $field['label'].' is required.',
                 ]);
             }
         }
 
         if (($type['logo_required'] ?? false) && ! $hasLogo) {
             throw ValidationException::withMessages([
-                'logo' => 'Unggah logo untuk jenis ini.',
+                'logo' => 'Upload a logo for this type.',
             ]);
         }
     }
@@ -233,7 +233,7 @@ class QrInput
 
         if (! is_array($decoded)) {
             throw ValidationException::withMessages([
-                $key => 'Format data tidak valid.',
+                $key => 'The data format is invalid.',
             ]);
         }
 

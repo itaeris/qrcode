@@ -30,18 +30,18 @@ class SettingsController extends Controller
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
-            'current_password.current_password' => 'Kata sandi saat ini salah.',
-            'password.required' => 'Kata sandi baru wajib diisi.',
-            'password.min' => 'Kata sandi baru minimal 8 karakter.',
-            'password.confirmed' => 'Konfirmasi kata sandi tidak sama.',
+            'current_password.required' => 'Current password is required.',
+            'current_password.current_password' => 'The current password is incorrect.',
+            'password.required' => 'New password is required.',
+            'password.min' => 'The new password must be at least 8 characters.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ]);
 
         $request->user()->update([
             'password' => $validated['password'],
         ]);
 
-        return back()->with('success', 'Kata sandi diperbarui.');
+        return back()->with('success', 'Password updated.');
     }
 
     public function storeUser(Request $request): RedirectResponse
@@ -51,13 +51,13 @@ class SettingsController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ], [
-            'name.required' => 'Nama wajib diisi.',
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Masukkan email yang valid.',
-            'email.unique' => 'Email ini sudah dipakai.',
-            'password.required' => 'Kata sandi wajib diisi.',
-            'password.min' => 'Kata sandi minimal 8 karakter.',
-            'password.confirmed' => 'Konfirmasi kata sandi tidak sama.',
+            'name.required' => 'Name is required.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Enter a valid email address.',
+            'email.unique' => 'This email is already in use.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'The password must be at least 8 characters.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ]);
 
         User::query()->create([
@@ -67,6 +67,6 @@ class SettingsController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        return back()->with('success', 'Pengguna ditambahkan.');
+        return back()->with('success', 'User added.');
     }
 }

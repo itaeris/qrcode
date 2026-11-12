@@ -50,7 +50,7 @@ class SettingsTest extends TestCase
                 'password_confirmation' => 'rahasia-baru',
             ])
             ->assertRedirect('/pengaturan')
-            ->assertSessionHas('success', 'Kata sandi diperbarui.');
+            ->assertSessionHas('success', 'Password updated.');
 
         $this->assertTrue(Hash::check('rahasia-baru', $user->fresh()->password));
 
@@ -98,7 +98,7 @@ class SettingsTest extends TestCase
                 'password_confirmation' => 'sandi-sari',
             ])
             ->assertRedirect('/pengaturan')
-            ->assertSessionHas('success', 'Pengguna ditambahkan.');
+            ->assertSessionHas('success', 'User added.');
 
         $this->assertDatabaseHas('users', [
             'name' => 'Sari',

@@ -15,7 +15,7 @@ class PayloadBuilder
         $built = match ($type) {
             'url', 'logo', 'shaped', 'smart' => $this->httpLink($this->string($fields, 'url'), $this->string($fields, 'label') ?: $this->host($this->string($fields, 'url')), 'url'),
             'appstore' => $this->appStore($fields),
-            'text' => $this->plain($this->string($fields, 'body'), 'Teks'),
+            'text' => $this->plain($this->string($fields, 'body'), 'Text'),
             'maps' => $this->maps($fields),
             'wifi' => $this->wifi($fields),
             'whatsapp' => $this->whatsapp($fields),
@@ -63,13 +63,13 @@ class PayloadBuilder
             'onlinebooking' => $this->onlineBooking($fields),
             'pcr' => $this->pcr($fields),
             'attendance' => $this->attendance($fields),
-            'pdf', 'audio', 'image', 'png', 'video', 'pptx', 'excel', 'file' => $this->file($fields, (string) (Catalog::find($type)['label'] ?? 'Berkas')),
-            default => throw ValidationException::withMessages(['type' => 'Jenis QR tidak dikenal.']),
+            'pdf', 'audio', 'image', 'png', 'video', 'pptx', 'excel', 'file' => $this->file($fields, (string) (Catalog::find($type)['label'] ?? 'File')),
+            default => throw ValidationException::withMessages(['type' => 'Unknown QR type.']),
         };
 
         if (strlen($built->text) > 1800) {
             throw ValidationException::withMessages([
-                'fields' => 'Isi terlalu panjang untuk sebuah QR code.',
+                'fields' => 'The content is too long for a QR code.',
             ]);
         }
 
@@ -96,9 +96,9 @@ class PayloadBuilder
         $primary = $play ?: $apple;
 
         return $this->content(
-            $primary ?? 'Aplikasi',
-            'Aplikasi',
-            $this->present('Unduh aplikasi', null, null, [], $actions),
+            $primary ?? 'App',
+            'App',
+            $this->present('Download the app', null, null, [], $actions),
             count($actions) === 1 ? $primary : null,
         );
     }
@@ -115,7 +115,7 @@ class PayloadBuilder
         if ($lat !== '' || $lng !== '') {
             if (! is_numeric($lat) || ! is_numeric($lng)) {
                 throw ValidationException::withMessages([
-                    'fields.lat' => 'Isi lintang dan bujur dengan angka.',
+                    'fields.lat' => 'Enter latitude and longitude as numbers.',
                 ]);
             }
 
@@ -124,14 +124,14 @@ class PayloadBuilder
 
         if ($query === '') {
             throw ValidationException::withMessages([
-                'fields.query' => 'Isi alamat atau koordinat.',
+                'fields.query' => 'Enter an address or coordinates.',
             ]);
         }
 
         $url = 'https://www.google.com/maps/search/?api=1&query='.rawurlencode($query);
 
         return $this->content($url, $query, $this->present($query, 'Google Maps', null, [], [
-            ['label' => 'Buka peta', 'href' => $url],
+            ['label' => 'Open map', 'href' => $url],
         ]), $url);
     }
 
@@ -151,11 +151,11 @@ class PayloadBuilder
         $hidden = filter_var($fields['hidden'] ?? false, FILTER_VALIDATE_BOOLEAN);
         $text = 'WIFI:T:'.$encryption.';S:'.$this->wifiEscape($ssid).';P:'.$this->wifiEscape($password).';H:'.($hidden ? 'true' : 'false').';;';
 
-        return $this->content($text, $ssid, $this->present($ssid, 'Jaringan Wi-Fi', 'Sandi ditampilkan supaya bisa disalin jika QR cerdas dipakai.', $this->rows([
-            'Jaringan' => $ssid,
-            'Keamanan' => $encryption === 'nopass' ? 'Tanpa sandi' : $encryption,
-            'Sandi' => $password,
-            'Tersembunyi' => $hidden ? 'Ya' : 'Tidak',
+        return $this->content($text, $ssid, $this->present($ssid, 'Wi-Fi network', 'The password is shown so it can be copied when a smart QR is used.', $this->rows([
+            'Network' => $ssid,
+            'Security' => $encryption === 'nopass' ? 'No password' : $encryption,
+            'Password' => $password,
+            'Hidden' => $hidden ? 'Yes' : 'No',
         ]), []));
     }
 
@@ -168,7 +168,7 @@ class PayloadBuilder
 
         if ($phone === '' || str_starts_with($phone, '0')) {
             throw ValidationException::withMessages([
-                'fields.phone' => 'Gunakan kode negara, misalnya 628123456789.',
+                'fields.phone' => 'Use a country code, for example 628123456789.',
             ]);
         }
 
@@ -176,7 +176,7 @@ class PayloadBuilder
         $url = 'https://wa.me/'.$phone.($message !== '' ? '?text='.rawurlencode($message) : '');
 
         return $this->content($url, 'WhatsApp '.$phone, $this->present('WhatsApp', '+'.$phone, $message !== '' ? $message : null, [], [
-            ['label' => 'Buka WhatsApp', 'href' => $url],
+            ['label' => 'Open WhatsApp', 'href' => $url],
         ]), $url);
     }
 
@@ -185,18 +185,18 @@ class PayloadBuilder
         $value = trim($value);
 
         if ($value === '') {
-            throw ValidationException::withMessages(['fields.value' => 'Isi nama atau tautan.']);
+            throw ValidationException::withMessages(['fields.value' => 'Enter a name or a link.']);
         }
 
         if (preg_match('#^https?://#i', $value) || str_contains($value, '/')) {
-            $url = $this->requireHttp($value, 'value', 'Tautan');
+            $url = $this->requireHttp($value, 'value', 'Link');
         } else {
             $handle = trim($value, "@/ \t");
             $url = $prefix.rawurlencode($handle);
         }
 
         return $this->content($url, $title, $this->present($title, $url, null, [], [
-            ['label' => 'Buka '.$title, 'href' => $url],
+            ['label' => 'Open '.$title, 'href' => $url],
         ]), $url);
     }
 
@@ -208,13 +208,13 @@ class PayloadBuilder
         $value = $this->string($fields, 'value');
 
         if (preg_match('#^https?://#i', $value) || str_contains($value, '/')) {
-            $url = $this->requireHttp($value, 'value', 'Tautan');
+            $url = $this->requireHttp($value, 'value', 'Link');
         } else {
             $url = 'https://search.google.com/local/writereview?placeid='.rawurlencode($value);
         }
 
-        return $this->content($url, 'Ulasan Google', $this->present('Tulis ulasan', null, null, [], [
-            ['label' => 'Buka ulasan', 'href' => $url],
+        return $this->content($url, 'Google review', $this->present('Write a review', null, null, [], [
+            ['label' => 'Open review', 'href' => $url],
         ]), $url);
     }
 
@@ -226,7 +226,7 @@ class PayloadBuilder
         $to = $this->string($fields, 'to');
 
         if (! filter_var($to, FILTER_VALIDATE_EMAIL)) {
-            throw ValidationException::withMessages(['fields.to' => 'Alamat surel tidak valid.']);
+            throw ValidationException::withMessages(['fields.to' => 'The email address is invalid.']);
         }
 
         $query = array_filter([
@@ -236,10 +236,10 @@ class PayloadBuilder
 
         $text = 'mailto:'.$to.($query ? '?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986) : '');
 
-        return $this->content($text, $to, $this->present($to, 'Surel', $this->string($fields, 'body') ?: null, $this->rows([
-            'Subjek' => $this->string($fields, 'subject'),
+        return $this->content($text, $to, $this->present($to, 'Email', $this->string($fields, 'body') ?: null, $this->rows([
+            'Subject' => $this->string($fields, 'subject'),
         ]), [
-            ['label' => 'Tulis surel', 'href' => $text],
+            ['label' => 'Write email', 'href' => $text],
         ]));
     }
 
@@ -251,8 +251,8 @@ class PayloadBuilder
         $phone = $this->phoneNumber($this->string($fields, 'phone'));
         $text = 'tel:'.$phone;
 
-        return $this->content($text, $phone, $this->present($phone, 'Panggilan telepon', null, [], [
-            ['label' => 'Telepon', 'href' => $text],
+        return $this->content($text, $phone, $this->present($phone, 'Phone call', null, [], [
+            ['label' => 'Call', 'href' => $text],
         ]));
     }
 
@@ -266,7 +266,7 @@ class PayloadBuilder
         $text = 'sms:'.$phone.($message !== '' ? '?body='.rawurlencode($message) : '');
 
         return $this->content($text, $phone, $this->present($phone, 'SMS', $message !== '' ? $message : null, [], [
-            ['label' => 'Tulis SMS', 'href' => $text],
+            ['label' => 'Write SMS', 'href' => $text],
         ]));
     }
 
@@ -307,11 +307,11 @@ class PayloadBuilder
         $lines[] = 'END:VCARD';
 
         return $this->content(implode("\r\n", $lines), $full, $this->present($full, $this->string($fields, 'job') ?: $this->string($fields, 'organization'), $this->string($fields, 'note') ?: null, $this->rows([
-            'Telepon' => $this->string($fields, 'phone'),
-            'Surel' => $this->string($fields, 'email'),
-            'Perusahaan' => $this->string($fields, 'organization'),
-            'Situs' => $this->string($fields, 'website'),
-            'Alamat' => $address,
+            'Phone' => $this->string($fields, 'phone'),
+            'Email' => $this->string($fields, 'email'),
+            'Company' => $this->string($fields, 'organization'),
+            'Website' => $this->string($fields, 'website'),
+            'Address' => $address,
         ]), []));
     }
 
@@ -354,8 +354,8 @@ class PayloadBuilder
         $lines[] = 'END:VCALENDAR';
 
         return $this->content(implode("\r\n", $lines), $title, $this->present($title, $this->displayDate($this->string($fields, 'start')), $details ?: null, $this->rows([
-            'Lokasi' => $location,
-            'Selesai' => $endRaw !== '' ? $this->displayDate($endRaw) : '',
+            'Location' => $location,
+            'End' => $endRaw !== '' ? $this->displayDate($endRaw) : '',
         ]), []));
     }
 
@@ -374,9 +374,9 @@ class PayloadBuilder
         }
 
         return $this->content($url, 'PayPal', $this->present('PayPal', $user, null, $this->rows([
-            'Nominal' => $amount !== '' ? $amount.' '.$currency : '',
+            'Amount' => $amount !== '' ? $amount.' '.$currency : '',
         ]), [
-            ['label' => 'Bayar dengan PayPal', 'href' => $url],
+            ['label' => 'Pay with PayPal', 'href' => $url],
         ]), $url);
     }
 
@@ -394,9 +394,9 @@ class PayloadBuilder
         $url = 'https://venmo.com/'.rawurlencode($user).'?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
         return $this->content($url, 'Venmo', $this->present('Venmo', $user, $this->string($fields, 'note') ?: null, $this->rows([
-            'Nominal' => $this->string($fields, 'amount'),
+            'Amount' => $this->string($fields, 'amount'),
         ]), [
-            ['label' => 'Buka Venmo', 'href' => $url],
+            ['label' => 'Open Venmo', 'href' => $url],
         ]), $url);
     }
 
@@ -415,7 +415,7 @@ class PayloadBuilder
         $address = $this->string($fields, 'address');
 
         if (strlen($address) < 8 || preg_match('/\s/', $address)) {
-            throw ValidationException::withMessages(['fields.address' => 'Alamat dompet tidak valid.']);
+            throw ValidationException::withMessages(['fields.address' => 'The wallet address is invalid.']);
         }
 
         $query = array_filter([
@@ -425,7 +425,7 @@ class PayloadBuilder
         $text = $scheme.':'.$address.($query ? '?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986) : '');
 
         return $this->content($text, $coin.' '.$address, $this->present($coin, $address, null, $this->rows([
-            'Jumlah' => $this->string($fields, 'amount'),
+            'Amount' => $this->string($fields, 'amount'),
             'Label' => $this->string($fields, 'label'),
         ]), []));
     }
@@ -438,7 +438,7 @@ class PayloadBuilder
         $pa = $this->string($fields, 'pa');
 
         if (! str_contains($pa, '@')) {
-            throw ValidationException::withMessages(['fields.pa' => 'UPI ID harus berisi @, misalnya nama@upi.']);
+            throw ValidationException::withMessages(['fields.pa' => 'A UPI ID must contain @, for example name@upi.']);
         }
 
         $query = array_filter([
@@ -451,9 +451,9 @@ class PayloadBuilder
         $text = 'upi://pay?'.http_build_query($query, '', '&', PHP_QUERY_RFC3986);
 
         return $this->content($text, $this->string($fields, 'pn'), $this->present($this->string($fields, 'pn'), $pa, $this->string($fields, 'note') ?: null, $this->rows([
-            'Nominal' => $this->string($fields, 'amount') !== '' ? $this->string($fields, 'amount').' INR' : '',
+            'Amount' => $this->string($fields, 'amount') !== '' ? $this->string($fields, 'amount').' INR' : '',
         ]), [
-            ['label' => 'Bayar dengan UPI', 'href' => $text],
+            ['label' => 'Pay with UPI', 'href' => $text],
         ]));
     }
 
@@ -465,7 +465,7 @@ class PayloadBuilder
         $amount = $this->string($fields, 'amount');
 
         if ($amount !== '' && ! preg_match('/^\d+(\.\d{1,2})?$/', $amount)) {
-            throw ValidationException::withMessages(['fields.amount' => 'Nominal PIX memakai titik, misalnya 25.00.']);
+            throw ValidationException::withMessages(['fields.amount' => 'A PIX amount uses a dot, for example 25.00.']);
         }
 
         $text = PixPayload::make(
@@ -477,9 +477,9 @@ class PayloadBuilder
         );
 
         return $this->content($text, $this->string($fields, 'name'), $this->present($this->string($fields, 'name'), 'PIX', $this->string($fields, 'note') ?: null, $this->rows([
-            'Kunci' => $this->string($fields, 'key'),
-            'Kota' => $this->string($fields, 'city'),
-            'Nominal' => $amount !== '' ? 'R$ '.$amount : '',
+            'Key' => $this->string($fields, 'key'),
+            'City' => $this->string($fields, 'city'),
+            'Amount' => $amount !== '' ? 'R$ '.$amount : '',
         ]), []));
     }
 
@@ -497,7 +497,7 @@ class PayloadBuilder
         $url = 'https://line.me/ti/p/~'.rawurlencode(trim($value, '@/ '));
 
         return $this->content($url, 'LINE', $this->present('LINE', $value, null, [], [
-            ['label' => 'Buka LINE', 'href' => $url],
+            ['label' => 'Open LINE', 'href' => $url],
         ]), $url);
     }
 
@@ -521,11 +521,11 @@ class PayloadBuilder
     private function links(array $fields): BuiltQr
     {
         $items = $this->linkItems($fields['links'] ?? []);
-        $headline = $this->string($fields, 'headline') ?: 'Daftar tautan';
+        $headline = $this->string($fields, 'headline') ?: 'Link list';
         $actions = array_map(fn ($item) => ['label' => $item['label'], 'href' => $item['url']], $items);
         $text = $items[0]['url'];
 
-        return $this->content($text, $headline, $this->present($headline, count($items).' tautan', null, [], $actions));
+        return $this->content($text, $headline, $this->present($headline, count($items).' links', null, [], $actions));
     }
 
     /**
@@ -555,14 +555,14 @@ class PayloadBuilder
         $website = $this->optionalHttp($fields, 'website');
 
         if ($website) {
-            $actions[] = ['label' => 'Situs', 'href' => $website];
+            $actions[] = ['label' => 'Website', 'href' => $website];
         }
 
         if ($actions === []) {
-            throw ValidationException::withMessages(['fields' => 'Isi minimal satu akun.']);
+            throw ValidationException::withMessages(['fields' => 'Enter at least one account.']);
         }
 
-        $headline = $this->string($fields, 'headline') ?: 'Media sosial';
+        $headline = $this->string($fields, 'headline') ?: 'Social media';
 
         return $this->content($actions[0]['href'], $headline, $this->present($headline, null, null, [], $actions));
     }
@@ -596,14 +596,14 @@ class PayloadBuilder
         $url = $this->optionalHttp($fields, 'url');
 
         if ($url) {
-            $actions[] = ['label' => 'Tautan bayar', 'href' => $url];
+            $actions[] = ['label' => 'Pay link', 'href' => $url];
         }
 
         $rows = $this->rows([
             'PIX' => $pix,
             'Crypto' => $crypto,
         ]);
-        $headline = $this->string($fields, 'headline') ?: 'Pembayaran';
+        $headline = $this->string($fields, 'headline') ?: 'Payment';
         $actions = array_values(array_filter($actions, fn ($action) => $action['href'] !== 'https://'));
         $text = $url ?: ($actions[0]['href'] ?? $this->summary($headline, $rows, $this->string($fields, 'note')));
 
@@ -618,14 +618,14 @@ class PayloadBuilder
         $name = $this->string($fields, 'name');
         $code = $this->string($fields, 'code');
         $url = $this->optionalHttp($fields, 'url');
-        $text = $name."\nKode: ".$code;
+        $text = $name."\nCode: ".$code;
         $expires = $this->string($fields, 'expires');
 
         if ($expires !== '') {
-            $text .= "\nBerlaku sampai: ".$expires;
+            $text .= "\nValid until: ".$expires;
         }
 
-        return $this->content($text, $name, $this->present($name, $expires !== '' ? 'Berlaku sampai '.$expires : null, $this->string($fields, 'note') ?: null, [], $url ? [['label' => 'Pakai kupon', 'href' => $url]] : [], $code));
+        return $this->content($text, $name, $this->present($name, $expires !== '' ? 'Valid until '.$expires : null, $this->string($fields, 'note') ?: null, [], $url ? [['label' => 'Use coupon', 'href' => $url]] : [], $code));
     }
 
     /**
@@ -635,11 +635,11 @@ class PayloadBuilder
     {
         $event = $this->string($fields, 'event');
         $code = $this->string($fields, 'code');
-        $text = $event."\nTiket: ".$code;
+        $text = $event."\nTicket: ".$code;
 
         return $this->content($text, $event, $this->present($event, $this->string($fields, 'when') ?: null, null, $this->rows([
-            'Nama' => $this->string($fields, 'holder'),
-            'Kursi' => $this->string($fields, 'seat'),
+            'Name' => $this->string($fields, 'holder'),
+            'Seat' => $this->string($fields, 'seat'),
         ]), [], $code));
     }
 
@@ -653,11 +653,11 @@ class PayloadBuilder
         $url = $this->optionalHttp($fields, 'url');
         $rows = $this->rows([
             'SKU' => $this->string($fields, 'sku'),
-            'Harga' => $price,
+            'Price' => $price,
         ]);
         $text = $url ?: $this->summary($name, $rows, '');
 
-        return $this->content($text, $name, $this->present($name, $price !== '' ? $price : null, null, $rows, $url ? [['label' => 'Lihat produk', 'href' => $url]] : []), $url);
+        return $this->content($text, $name, $this->present($name, $price !== '' ? $price : null, null, $rows, $url ? [['label' => 'View product', 'href' => $url]] : []), $url);
     }
 
     /**
@@ -670,7 +670,7 @@ class PayloadBuilder
         $url = $this->optionalHttp($fields, 'url');
         $text = $url ?: trim($name."\n".$amount."\n".$this->string($fields, 'note'));
 
-        return $this->content($text, $name, $this->present($name, $amount !== '' ? $amount : null, $this->string($fields, 'note') ?: null, [], $url ? [['label' => 'Bayar', 'href' => $url]] : []), $url);
+        return $this->content($text, $name, $this->present($name, $amount !== '' ? $amount : null, $this->string($fields, 'note') ?: null, [], $url ? [['label' => 'Pay', 'href' => $url]] : []), $url);
     }
 
     /**
@@ -681,13 +681,13 @@ class PayloadBuilder
         $name = $this->string($fields, 'name');
         $url = $this->optionalHttp($fields, 'url');
         $rows = $this->rows([
-            'Waktu' => $this->displayDate($this->string($fields, 'when')),
-            'Jumlah' => $this->string($fields, 'party'),
-            'Lokasi' => $this->string($fields, 'location'),
+            'Time' => $this->displayDate($this->string($fields, 'when')),
+            'Party size' => $this->string($fields, 'party'),
+            'Location' => $this->string($fields, 'location'),
         ]);
         $onlyUrl = $url && $rows === [] && $this->string($fields, 'note') === '';
 
-        return $this->content($url ?: $this->summary($name, $rows, $this->string($fields, 'note')), $name, $this->present($name, null, $this->string($fields, 'note') ?: null, $rows, $url ? [['label' => 'Buka pemesanan', 'href' => $url]] : []), $onlyUrl ? $url : null);
+        return $this->content($url ?: $this->summary($name, $rows, $this->string($fields, 'note')), $name, $this->present($name, null, $this->string($fields, 'note') ?: null, $rows, $url ? [['label' => 'Open booking', 'href' => $url]] : []), $onlyUrl ? $url : null);
     }
 
     /**
@@ -700,7 +700,7 @@ class PayloadBuilder
         $when = $this->displayDate($this->string($fields, 'when'));
         $onlyUrl = $url && $when === '' && $this->string($fields, 'note') === '';
 
-        return $this->content($url ?: $this->summary($service, $this->rows(['Waktu' => $when]), $this->string($fields, 'note')), $service, $this->present($service, $when ?: null, $this->string($fields, 'note') ?: null, [], $url ? [['label' => 'Booking', 'href' => $url]] : []), $onlyUrl ? $url : null);
+        return $this->content($url ?: $this->summary($service, $this->rows(['Time' => $when]), $this->string($fields, 'note')), $service, $this->present($service, $when ?: null, $this->string($fields, 'note') ?: null, [], $url ? [['label' => 'Booking', 'href' => $url]] : []), $onlyUrl ? $url : null);
     }
 
     /**
@@ -712,11 +712,11 @@ class PayloadBuilder
         $code = $this->string($fields, 'code');
 
         return $this->content($this->summary($name, $this->rows([
-            'Kode' => $code,
-            'Hasil' => $this->string($fields, 'result'),
-            'Tanggal' => $this->string($fields, 'date'),
+            'Code' => $code,
+            'Result' => $this->string($fields, 'result'),
+            'Date' => $this->string($fields, 'date'),
         ]), $this->string($fields, 'note')), $name, $this->present($name, $this->string($fields, 'result') ?: null, $this->string($fields, 'note') ?: null, $this->rows([
-            'Tanggal' => $this->string($fields, 'date'),
+            'Date' => $this->string($fields, 'date'),
         ]), [], $code));
     }
 
@@ -727,9 +727,9 @@ class PayloadBuilder
     {
         $event = $this->string($fields, 'event');
 
-        return $this->content($event, $event, $this->present($event, 'Isi nama untuk mencatat kehadiran', null, $this->rows([
-            'Lokasi' => $this->string($fields, 'location'),
-            'Waktu' => $this->string($fields, 'when'),
+        return $this->content($event, $event, $this->present($event, 'Enter your name to check in', null, $this->rows([
+            'Location' => $this->string($fields, 'location'),
+            'Time' => $this->string($fields, 'when'),
         ]), [], null, true));
     }
 
@@ -743,11 +743,11 @@ class PayloadBuilder
 
         if ($url) {
             return $this->content($url, $name, $this->present($name, $label, null, [], [
-                ['label' => 'Buka berkas', 'href' => $url],
+                ['label' => 'Open file', 'href' => $url],
             ]), $url);
         }
 
-        return $this->content($name, $name, $this->present($name, $label, 'Berkas tersedia di halaman ini.', [], []));
+        return $this->content($name, $name, $this->present($name, $label, 'The file is available on this page.', [], []));
     }
 
     private function plain(string $text, string $title): BuiltQr
@@ -768,7 +768,7 @@ class PayloadBuilder
         $headline = $title !== '' ? $title : $this->host($url);
 
         return $this->content($url, $headline, $this->present($headline, $url, null, [], [
-            ['label' => 'Buka tautan', 'href' => $url],
+            ['label' => 'Open link', 'href' => $url],
         ]), $url);
     }
 
@@ -856,7 +856,7 @@ class PayloadBuilder
     private function linkItems(mixed $items): array
     {
         if (! is_array($items)) {
-            throw ValidationException::withMessages(['fields.links' => 'Tambahkan minimal satu tautan.']);
+            throw ValidationException::withMessages(['fields.links' => 'Add at least one link.']);
         }
 
         $links = [];
@@ -877,7 +877,7 @@ class PayloadBuilder
         }
 
         if ($links === []) {
-            throw ValidationException::withMessages(['fields.links' => 'Tambahkan minimal satu tautan yang valid.']);
+            throw ValidationException::withMessages(['fields.links' => 'Add at least one valid link.']);
         }
 
         return $links;
@@ -903,7 +903,7 @@ class PayloadBuilder
 
         if (! $url) {
             throw ValidationException::withMessages([
-                'fields.'.$field => $label.' harus berupa tautan http atau https.',
+                'fields.'.$field => $label.' must be an http or https link.',
             ]);
         }
 
@@ -917,7 +917,7 @@ class PayloadBuilder
         $digits = preg_replace('/\D+/', '', $value) ?? '';
 
         if ($digits === '') {
-            throw ValidationException::withMessages(['fields.phone' => 'Nomor telepon tidak valid.']);
+            throw ValidationException::withMessages(['fields.phone' => 'The phone number is invalid.']);
         }
 
         return ($plus ? '+' : '').$digits;
@@ -946,7 +946,7 @@ class PayloadBuilder
 
         if ($timestamp === false) {
             throw ValidationException::withMessages([
-                'fields.'.$field => 'Waktu tidak valid.',
+                'fields.'.$field => 'The time is invalid.',
             ]);
         }
 

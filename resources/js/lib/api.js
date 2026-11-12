@@ -41,8 +41,8 @@ export async function api(url, { body, signal } = {}) {
 
     if (!response.ok) {
         const message = response.status === 419 || response.status === 401
-            ? 'Sesi habis. Masuk lagi untuk melanjutkan.'
-            : (firstError(data.errors) || data.message || 'Permintaan gagal.');
+            ? 'Your session expired. Sign in again to continue.'
+            : (firstError(data.errors) || data.message || 'The request failed.');
         const error = new Error(message);
         error.status = response.status;
         throw error;

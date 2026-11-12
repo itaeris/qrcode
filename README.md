@@ -1,16 +1,16 @@
 # QR Generate
 
-Aplikasi web untuk membuat dan mengelola kode QR. Halaman utama menampilkan daftar proyek. Form pembuatan ada di halaman terpisah. QR yang sudah dicetak tetap bisa dibuka tanpa login.
+A web app for creating and managing QR codes. The home page lists saved projects. The builder is a separate page. Printed QR codes still open without signing in.
 
 ## Stack
 
-- PHP 8.3+ dan Laravel 13
-- Vue 3 dengan Inertia
+- PHP 8.3+ and Laravel 13
+- Vue 3 with Inertia
 - Tailwind CSS 4
-- SQLite bawaan, atau MySQL lewat `.env`
-- QR digambar sebagai SVG di server. Unduhan PNG dibuat di browser dari SVG itu.
+- SQLite by default, or MySQL through `.env`
+- QR codes are drawn as SVG on the server. PNG downloads are rendered in the browser from that SVG.
 
-## Menjalankan
+## Run
 
 ```bash
 composer install
@@ -23,32 +23,36 @@ npm install
 composer run dev
 ```
 
-Buka http://127.0.0.1:8000. `composer run dev` menjalankan server PHP dan Vite sekaligus.
+Open http://127.0.0.1:8000. `composer run dev` starts the PHP server and Vite together.
 
-Akun admin dibuat oleh `database/seeders/AdminUserSeeder.php`. Masuk lewat http://127.0.0.1:8000/masuk.
+The admin account is created by `database/seeders/AdminUserSeeder.php`. Sign in at http://127.0.0.1:8000/masuk. Google sign-in works only for an email that an admin has already added. Register `http://localhost:8000/masuk/google/callback` as an authorized redirect URI in Google Cloud. Production uses `https://qrcode.aerisbeaute.com/masuk/google/callback`.
 
-Untuk build frontend tanpa Vite dev server:
+To build the frontend without the Vite dev server:
 
 ```bash
 npm run build
 php artisan serve
 ```
 
-## Halaman
+## Pages
 
-| Alamat | Fungsi |
+| Address | Purpose |
 | --- | --- |
-| `/masuk` | Login |
-| `/` | Daftar proyek |
-| `/buat` | Buat QR |
-| `/kelola/{kode}` | Ubah QR yang sudah disimpan |
-| `/q/{kode}` | Halaman publik saat QR dipindai |
+| `/masuk` | Sign in |
+| `/` | Project list |
+| `/buat` | Create a QR |
+| `/kelola/{code}` | Scan analytics |
+| `/kelola/{code}/ubah` | Edit a saved QR |
+| `/tautan` | Short links |
+| `/pengaturan` | Password and users |
+| `/q/{code}` | Public page when a QR is scanned |
+| `/s/{code}` | Public short-link redirect |
 
-## QR cerdas
+## Smart QR
 
-QR biasa menyimpan isi langsung, misalnya Wi-Fi, vCard, telepon, atau SMS. QR cerdas menyimpan tautan pendek, jadi tujuan atau isi halaman bisa diganti tanpa mencetak ulang. Jumlah pindaian tercatat di kartu proyek.
+A smart QR stores a short link, so the destination can change without reprinting. Scans are counted on the project card.
 
-## Tes
+## Tests
 
 ```bash
 php artisan test

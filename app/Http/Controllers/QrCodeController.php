@@ -159,7 +159,7 @@ class QrCodeController extends Controller
 
     private function authorizeLink(QrLink $link, string $secret): void
     {
-        abort_unless($secret !== '' && hash_equals($link->secret, $secret), 403, 'Kunci QR tidak cocok.');
+        abort_unless($secret !== '' && hash_equals($link->secret, $secret), 403, 'The QR key does not match.');
     }
 
     /**

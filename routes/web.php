@@ -5,11 +5,18 @@ use App\Http\Controllers\GeneratorController;
 use App\Http\Controllers\PublicQrController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\ShortLinkController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
     Route::get('/masuk', [LoginController::class, 'create'])->name('login');
     Route::post('/masuk', [LoginController::class, 'store'])->middleware('throttle:5,1');
+    Route::get('/masuk/google', [LoginController::class, 'google'])
+        ->middleware('throttle:10,1')
+        ->name('google.redirect');
+    Route::get('/masuk/google/callback', [LoginController::class, 'googleCallback'])
+        ->middleware('throttle:10,1')
+        ->name('google.callback');
 });
 
 Route::post('/keluar', [LoginController::class, 'destroy'])
@@ -56,7 +63,28 @@ Route::middleware('auth')->group(function () {
     Route::post('/pengaturan/pengguna', [SettingsController::class, 'storeUser'])
         ->middleware('throttle:10,1')
         ->name('settings.users.store');
+
+    Route::get('/tautan', [ShortLinkController::class, 'index'])->name('short-links.index');
+    Route::post('/tautan', [ShortLinkController::class, 'store'])
+        ->middleware('throttle:20,1')
+        ->name('short-links.store');
+    Route::get('/tautan/{code}', [ShortLinkController::class, 'show'])
+        ->where('code', '[a-z0-9]{3,16}')
+        ->name('short-links.show');
+    Route::put('/tautan/{code}', [ShortLinkController::class, 'update'])
+        ->where('code', '[a-z0-9]{3,16}')
+        ->middleware('throttle:30,1')
+        ->name('short-links.update');
+    Route::post('/tautan/{code}/hapus', [ShortLinkController::class, 'destroy'])
+        ->where('code', '[a-z0-9]{3,16}')
+        ->middleware('throttle:30,1')
+        ->name('short-links.destroy');
 });
+
+Route::get('/s/{code}', [ShortLinkController::class, 'visit'])
+    ->where('code', '[a-z0-9]{3,16}')
+    ->middleware('throttle:120,1')
+    ->name('short.visit');
 
 Route::get('/q/{code}', [PublicQrController::class, 'show'])
     ->where('code', '[a-z0-9]{8}')
