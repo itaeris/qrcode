@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link, router } from '@inertiajs/vue3';
+import { ChevronLeft, ChevronRight } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import AppShell from '../Components/AppShell.vue';
 
@@ -14,8 +15,28 @@ const props = defineProps({
 
 const dari = ref(props.filters.from);
 const sampai = ref(props.filters.to);
+const scroller = ref(null);
 const peak = computed(() => Math.max(1, ...props.days.map((day) => day.count)));
 const busiestPlace = computed(() => Math.max(1, ...props.places.map((place) => place.count)));
+
+function dayNumber(date) {
+    return date.slice(8);
+}
+
+function monthName(date, index) {
+    const month = date.slice(0, 7);
+    const previous = props.days[index - 1]?.date.slice(0, 7);
+
+    if (month === previous) {
+        return '';
+    }
+
+    return new Intl.DateTimeFormat('id-ID', { month: 'short' }).format(new Date(`${date}T00:00:00`));
+}
+
+function scrollChart(direction) {
+    scroller.value?.scrollBy({ left: direction * 220, behavior: 'smooth' });
+}
 
 function apply() {
     router.get(`/kelola/${props.qr.code}`, {
@@ -56,14 +77,25 @@ function formatTime(value) {
         </form>
         <section class="rounded-3xl border border-[#e6e7ee] bg-white p-5">
             <h2 class="text-base font-semibold">Pindaian per tanggal</h2>
-            <div class="mt-4 flex h-40 items-end gap-2 overflow-x-auto">
-                <div v-for="day in days" :key="day.date" class="flex w-10 shrink-0 flex-col items-center gap-1">
-                    <span class="text-[11px] text-[#6d6a7a]">{{ day.count }}</span>
-                    <div class="flex h-28 w-full items-end rounded-lg bg-[#f8e8ea]">
-                        <div class="w-full rounded-lg bg-[#7a2030]" :style="{ height: `${Math.max(day.count ? 8 : 0, (day.count / peak) * 100)}%` }" />
+            <div class="mt-4 flex items-center gap-2">
+                <button type="button" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-[#e6e7ee] text-[#7a2030]" aria-label="Tanggal sebelumnya" @click="scrollChart(-1)">
+                    <ChevronLeft :size="16" />
+                </button>
+                <div ref="scroller" class="chart-scroll min-w-0 flex-1 overflow-x-auto">
+                    <div class="flex h-44 min-w-max items-end gap-2 pt-5">
+                        <div v-for="(day, index) in days" :key="day.date" class="relative flex w-8 shrink-0 flex-col items-center gap-1">
+                            <span v-if="monthName(day.date, index)" class="absolute -top-5 left-0 text-[11px] font-medium whitespace-nowrap text-[#7a2030]">{{ monthName(day.date, index) }}</span>
+                            <span class="text-[11px] text-[#6d6a7a]">{{ day.count || '' }}</span>
+                            <div class="flex h-24 w-full items-end rounded-md bg-[#f8e8ea]">
+                                <div class="w-full rounded-md bg-[#7a2030]" :style="{ height: `${Math.max(day.count ? 8 : 0, (day.count / peak) * 100)}%` }" />
+                            </div>
+                            <span class="text-[11px] text-[#6d6a7a]">{{ dayNumber(day.date) }}</span>
+                        </div>
                     </div>
-                    <span class="text-center text-[10px] leading-tight text-[#6d6a7a]">{{ day.label }}</span>
                 </div>
+                <button type="button" class="grid size-8 shrink-0 cursor-pointer place-items-center rounded-full border border-[#e6e7ee] text-[#7a2030]" aria-label="Tanggal berikutnya" @click="scrollChart(1)">
+                    <ChevronRight :size="16" />
+                </button>
             </div>
         </section>
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
