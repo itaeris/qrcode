@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\GeneratorController;
 use App\Http\Controllers\PublicQrController;
 use App\Http\Controllers\QrCodeController;
+use App\Http\Controllers\SettingsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -44,6 +45,14 @@ Route::middleware('auth')->group(function () {
         ->where('code', '[a-z0-9]{8}')
         ->middleware('throttle:30,1')
         ->name('qr.open');
+
+    Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('settings');
+    Route::put('/pengaturan/sandi', [SettingsController::class, 'updatePassword'])
+        ->middleware('throttle:5,1')
+        ->name('settings.password');
+    Route::post('/pengaturan/pengguna', [SettingsController::class, 'storeUser'])
+        ->middleware('throttle:10,1')
+        ->name('settings.users.store');
 });
 
 Route::get('/q/{code}', [PublicQrController::class, 'show'])

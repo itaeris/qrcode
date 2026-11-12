@@ -38,7 +38,7 @@ function active(path) {
 <template>
     <div class="min-h-screen">
         <header class="sticky top-0 z-20 border-b border-[#eceef3] bg-[#f4f5f8]/90 backdrop-blur">
-            <div class="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6">
+            <div class="mx-auto flex min-h-16 max-w-[1200px] items-center justify-between gap-3 px-4 py-2 sm:px-6">
                 <Link href="/" class="flex items-center gap-2.5">
                     <span class="grid h-9 w-9 grid-cols-2 gap-0.5 rounded-xl bg-[#efe7ff] p-1.5 text-[#6d28d9]">
                         <span class="rounded-[3px] bg-current" />
@@ -48,7 +48,7 @@ function active(path) {
                     </span>
                     <span class="text-[15px] font-semibold tracking-tight">QR Generate</span>
                 </Link>
-                <nav v-if="user" class="flex items-center gap-1 text-sm">
+                <nav v-if="user" class="flex flex-wrap items-center justify-end gap-1 text-sm">
                     <Link
                         href="/"
                         class="rounded-full px-3 py-1.5"
@@ -62,6 +62,13 @@ function active(path) {
                         :class="active('/buat') ? 'bg-white font-medium text-[#6d28d9] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
                         Buat
+                    </Link>
+                    <Link
+                        href="/pengaturan"
+                        class="rounded-full px-3 py-1.5"
+                        :class="active('/pengaturan') ? 'bg-white font-medium text-[#6d28d9] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                    >
+                        Pengaturan
                     </Link>
                     <button type="button" class="rounded-full px-3 py-1.5 text-[#5c5a66] hover:text-[#1c1b22]" @click="logout">
                         Keluar
