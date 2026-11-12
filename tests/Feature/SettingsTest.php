@@ -15,7 +15,7 @@ class SettingsTest extends TestCase
     #[Test]
     public function guests_cannot_open_settings(): void
     {
-        $this->get('/pengaturan')->assertRedirect('/masuk');
+        $this->get('/settings')->assertRedirect('/login');
     }
 
     #[Test]
@@ -24,39 +24,39 @@ class SettingsTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->get('/pengaturan')
+            ->get('/settings')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Settings/Index')
                 ->where('users.0.email', $user->email));
 
         $this->actingAs($user)
-            ->from('/pengaturan')
-            ->put('/pengaturan/sandi', [
+            ->from('/settings')
+            ->put('/settings/password', [
                 'current_password' => 'salah',
                 'password' => 'rahasia-baru',
                 'password_confirmation' => 'rahasia-baru',
             ])
-            ->assertRedirect('/pengaturan')
+            ->assertRedirect('/settings')
             ->assertSessionHasErrors('current_password');
 
         $this->assertTrue(Hash::check('password', $user->fresh()->password));
 
         $this->actingAs($user)
-            ->from('/pengaturan')
-            ->put('/pengaturan/sandi', [
+            ->from('/settings')
+            ->put('/settings/password', [
                 'current_password' => 'password',
                 'password' => 'rahasia-baru',
                 'password_confirmation' => 'rahasia-baru',
             ])
-            ->assertRedirect('/pengaturan')
+            ->assertRedirect('/settings')
             ->assertSessionHas('success', 'Password updated.');
 
         $this->assertTrue(Hash::check('rahasia-baru', $user->fresh()->password));
 
-        $this->post('/keluar');
+        $this->post('/logout');
 
-        $this->post('/masuk', [
+        $this->post('/login', [
             'email' => $user->email,
             'password' => 'rahasia-baru',
         ])->assertRedirect('/');
@@ -68,36 +68,36 @@ class SettingsTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->from('/pengaturan')
-            ->post('/pengaturan/pengguna', [
+            ->from('/settings')
+            ->post('/settings/users', [
                 'name' => 'Sari',
                 'email' => $user->email,
                 'password' => 'sandi-sari',
                 'password_confirmation' => 'sandi-sari',
             ])
-            ->assertRedirect('/pengaturan')
+            ->assertRedirect('/settings')
             ->assertSessionHasErrors('email');
 
         $this->actingAs($user)
-            ->from('/pengaturan')
-            ->post('/pengaturan/pengguna', [
+            ->from('/settings')
+            ->post('/settings/users', [
                 'name' => 'Sari',
                 'email' => 'sari@aerisbeaute.com',
                 'password' => 'sandi-sari',
                 'password_confirmation' => 'beda',
             ])
-            ->assertRedirect('/pengaturan')
+            ->assertRedirect('/settings')
             ->assertSessionHasErrors('password');
 
         $this->actingAs($user)
-            ->from('/pengaturan')
-            ->post('/pengaturan/pengguna', [
+            ->from('/settings')
+            ->post('/settings/users', [
                 'name' => 'Sari',
                 'email' => 'sari@aerisbeaute.com',
                 'password' => 'sandi-sari',
                 'password_confirmation' => 'sandi-sari',
             ])
-            ->assertRedirect('/pengaturan')
+            ->assertRedirect('/settings')
             ->assertSessionHas('success', 'User added.');
 
         $this->assertDatabaseHas('users', [
@@ -105,9 +105,9 @@ class SettingsTest extends TestCase
             'email' => 'sari@aerisbeaute.com',
         ]);
 
-        $this->post('/keluar');
+        $this->post('/logout');
 
-        $this->post('/masuk', [
+        $this->post('/login', [
             'email' => 'sari@aerisbeaute.com',
             'password' => 'sandi-sari',
         ])->assertRedirect('/');

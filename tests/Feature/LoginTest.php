@@ -16,8 +16,8 @@ class LoginTest extends TestCase
     #[Test]
     public function guests_are_sent_to_the_login_page(): void
     {
-        $this->get('/')->assertRedirect('/masuk');
-        $this->get('/masuk')->assertOk()->assertInertia(fn ($page) => $page->component('Auth/Login'));
+        $this->get('/')->assertRedirect('/login');
+        $this->get('/login')->assertOk()->assertInertia(fn ($page) => $page->component('Auth/Login'));
     }
 
     #[Test]
@@ -25,12 +25,12 @@ class LoginTest extends TestCase
     {
         $this->seed(AdminUserSeeder::class);
 
-        $this->post('/masuk', [
+        $this->post('/login', [
             'email' => 'dwiki@aerisbeaute.com',
             'password' => 'salah',
         ])->assertSessionHasErrors('email');
 
-        $this->post('/masuk', [
+        $this->post('/login', [
             'email' => 'dwiki@aerisbeaute.com',
             'password' => 'aerisbeaute',
         ])->assertRedirect('/');
@@ -39,8 +39,37 @@ class LoginTest extends TestCase
             ->component('Projects')
             ->where('auth.user.email', 'dwiki@aerisbeaute.com'));
 
-        $this->post('/keluar')->assertRedirect('/masuk');
-        $this->get('/')->assertRedirect('/masuk');
+        $this->post('/logout')->assertRedirect('/login');
+        $this->get('/')->assertRedirect('/login');
+    }
+
+    #[Test]
+    public function repeated_wrong_passwords_lock_that_email(): void
+    {
+        $this->seed(AdminUserSeeder::class);
+        $other = User::factory()->create(['email' => 'other@example.com']);
+
+        for ($attempt = 1; $attempt <= 5; $attempt++) {
+            $this->withHeader('X-Forwarded-For', '203.0.113.'.$attempt)
+                ->post('/login', [
+                    'email' => 'dwiki@aerisbeaute.com',
+                    'password' => 'wrong-password',
+                ])->assertSessionHasErrors('email');
+        }
+
+        $this->withHeader('X-Forwarded-For', '203.0.113.20')
+            ->post('/login', [
+                'email' => 'dwiki@aerisbeaute.com',
+                'password' => 'aerisbeaute',
+            ])->assertStatus(429);
+
+        $this->assertGuest();
+
+        $this->withHeader('X-Forwarded-For', '203.0.113.30')
+            ->post('/login', [
+                'email' => $other->email,
+                'password' => 'password',
+            ])->assertRedirect('/');
     }
 
     #[Test]
@@ -48,7 +77,7 @@ class LoginTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        $this->get('/masuk')->assertRedirect('/');
+        $this->get('/login')->assertRedirect('/');
     }
 
     #[Test]

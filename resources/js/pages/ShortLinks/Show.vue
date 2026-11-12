@@ -27,13 +27,13 @@ const peak = computed(() => Math.max(1, ...props.days.map((day) => day.count)));
 const busiestPlace = computed(() => Math.max(1, ...props.places.map((place) => place.count)));
 
 function save() {
-    form.put(`/tautan/${props.link.code}`, { preserveScroll: true });
+    form.put(`/links/${props.link.code}`, { preserveScroll: true });
 }
 
 function apply() {
-    router.get(`/tautan/${props.link.code}`, {
-        dari: dari.value,
-        sampai: sampai.value,
+    router.get(`/links/${props.link.code}`, {
+        from: dari.value,
+        to: sampai.value,
     }, {
         preserveScroll: true,
     });
@@ -68,7 +68,7 @@ function formatTime(value) {
     <AppShell>
         <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
             <div>
-                <Link href="/tautan" class="text-sm text-[#7a2030]">Short links</Link>
+                <Link href="/links" class="text-sm text-[#7a2030]">Short links</Link>
                 <h1 class="mt-1 text-2xl font-semibold tracking-tight">{{ link.title }}</h1>
                 <p class="mt-1 break-all text-sm text-[#7a2030]">{{ link.short_url }}</p>
             </div>

@@ -50,7 +50,7 @@ async function confirmRemove() {
     error.value = '';
 
     try {
-        await api(`/qr/${item.code}/hapus`, { body: {} });
+        await api(`/qr/${item.code}/delete`, { body: {} });
         forget(item.code);
         items.value = items.value.filter((row) => row.code !== item.code);
         pendingDelete.value = null;
@@ -67,7 +67,7 @@ function formatTime(value) {
 }
 
 function qrSvg(svg) {
-    return typeof svg === 'string' && svg.startsWith('<svg') && !svg.includes('<script') ? svg : '';
+    return typeof svg === 'string' && svg.startsWith('<svg') && !/<script|javascript:|foreignObject|\son[a-z]+\s*=/i.test(svg) ? svg : '';
 }
 
 async function download(item) {
@@ -132,8 +132,8 @@ async function download(item) {
                         <ChevronDown :size="16" />
                     </button>
                     <div v-if="createOpen" class="absolute right-0 z-20 mt-2 w-44 overflow-hidden rounded-2xl border border-[#e6e7ee] bg-white p-1 shadow-lg" role="menu">
-                        <Link href="/buat" class="block rounded-xl px-3 py-2 text-sm hover:bg-[#f8e8ea]" role="menuitem" @click="createOpen = false">New QR</Link>
-                        <Link href="/tautan" class="block rounded-xl px-3 py-2 text-sm hover:bg-[#f8e8ea]" role="menuitem" @click="createOpen = false">Short link</Link>
+                        <Link href="/create" class="block rounded-xl px-3 py-2 text-sm hover:bg-[#f8e8ea]" role="menuitem" @click="createOpen = false">New QR</Link>
+                        <Link href="/links" class="block rounded-xl px-3 py-2 text-sm hover:bg-[#f8e8ea]" role="menuitem" @click="createOpen = false">Short link</Link>
                     </div>
                 </div>
             </div>
@@ -142,7 +142,7 @@ async function download(item) {
         <div v-if="items.length === 0" class="rounded-3xl border border-dashed border-[#d9dbe3] bg-white px-6 py-16 text-center">
             <p class="font-medium">No projects yet</p>
             <p class="mt-1 text-sm text-[#6d6a7a]">Create your first QR, then save it.</p>
-            <Link href="/buat" class="mt-4 inline-flex rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">Create QR</Link>
+            <Link href="/create" class="mt-4 inline-flex rounded-full bg-[#f8e8ea] px-4 py-2 text-sm font-medium text-[#7a2030]">Create QR</Link>
         </div>
         <div v-else-if="view === 'list'" class="overflow-hidden rounded-3xl border border-[#e6e7ee] bg-white shadow-[0_1px_2px_rgba(20,18,31,0.04)]">
             <div v-for="item in items" :key="item.code" class="flex flex-wrap items-center gap-3 border-b border-[#f0f1f5] px-4 py-3 last:border-b-0 sm:px-5">
@@ -152,8 +152,8 @@ async function download(item) {
                     <p class="text-xs text-[#6d6a7a]">{{ item.scans }} scans · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
-                    <Link :href="`/kelola/${item.code}/ubah`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
+                    <Link :href="`/manage/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
+                    <Link :href="`/manage/${item.code}/edit`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Open</a>
                     <button
                         type="button"
@@ -183,8 +183,8 @@ async function download(item) {
                     <p class="mt-1 text-sm text-[#6d6a7a]">{{ item.scans }} scans · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="mt-5 flex flex-wrap gap-2">
-                    <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
-                    <Link :href="`/kelola/${item.code}/ubah`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
+                    <Link :href="`/manage/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
+                    <Link :href="`/manage/${item.code}/edit`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Open</a>
                     <button type="button" class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm" @click="download(item)">
                         <Download :size="15" />

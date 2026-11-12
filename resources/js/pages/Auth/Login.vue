@@ -13,7 +13,7 @@ const showPassword = ref(false);
 const notice = computed(() => page.props.flash?.error ?? '');
 
 function submit() {
-    form.post('/masuk', {
+    form.post('/login', {
         onFinish: () => form.reset('password'),
     });
 }
@@ -83,7 +83,7 @@ function submit() {
                 or
                 <span class="h-px flex-1 bg-[#e6e7ee]" />
             </div>
-            <a href="/masuk/google" class="flex w-full items-center justify-center gap-2 rounded-full border border-[#e6e7ee] px-4 py-2.5 text-sm font-medium">
+            <a href="/login/google" class="flex w-full items-center justify-center gap-2 rounded-full border border-[#e6e7ee] px-4 py-2.5 text-sm font-medium">
                 <svg viewBox="0 0 24 24" class="size-4" aria-hidden="true">
                     <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.4h6.5a5.6 5.6 0 0 1-2.4 3.7v3h3.9c2.3-2.1 3.5-5.2 3.5-8.8z" />
                     <path fill="#34A853" d="M12 24c3.2 0 5.9-1.1 7.9-2.9l-3.9-3c-1.1.7-2.4 1.2-4 1.2-3.1 0-5.7-2.1-6.6-4.9H1.4v3.1A12 12 0 0 0 12 24z" />

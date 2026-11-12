@@ -25,14 +25,14 @@ const userForm = useForm({
 });
 
 function updatePassword() {
-    passwordForm.put('/pengaturan/sandi', {
+    passwordForm.put('/settings/password', {
         preserveScroll: true,
         onSuccess: () => passwordForm.reset(),
     });
 }
 
 function addUser() {
-    userForm.post('/pengaturan/pengguna', {
+    userForm.post('/settings/users', {
         preserveScroll: true,
         onSuccess: () => userForm.reset(),
     });

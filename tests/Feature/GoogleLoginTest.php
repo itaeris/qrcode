@@ -18,7 +18,7 @@ class GoogleLoginTest extends TestCase
     {
         Socialite::fake('google');
 
-        $this->get('/masuk/google')->assertRedirect('https://socialite.fake/google/authorize');
+        $this->get('/login/google')->assertRedirect('https://socialite.fake/google/authorize');
     }
 
     #[Test]
@@ -35,7 +35,7 @@ class GoogleLoginTest extends TestCase
             'email_verified' => true,
         ]));
 
-        $this->get('/masuk/google/callback')->assertRedirect('/');
+        $this->get('/login/google/callback')->assertRedirect('/');
 
         $this->assertAuthenticatedAs($user);
         $this->assertSame('Member', $user->fresh()->name);
@@ -50,9 +50,9 @@ class GoogleLoginTest extends TestCase
             'email_verified' => true,
         ]));
 
-        $this->get('/masuk/google/callback')
-            ->assertRedirect('/masuk')
-            ->assertSessionHas('error', 'This Google account is not registered.');
+        $this->get('/login/google/callback')
+            ->assertRedirect('/login')
+            ->assertSessionHas('error', 'This Google account cannot sign in.');
 
         $this->assertGuest();
         $this->assertSame(0, User::query()->count());
@@ -68,9 +68,9 @@ class GoogleLoginTest extends TestCase
             'email_verified' => false,
         ]));
 
-        $this->get('/masuk/google/callback')
-            ->assertRedirect('/masuk')
-            ->assertSessionHas('error', 'Google did not confirm this email address.');
+        $this->get('/login/google/callback')
+            ->assertRedirect('/login')
+            ->assertSessionHas('error', 'This Google account cannot sign in.');
 
         $this->assertGuest();
     }

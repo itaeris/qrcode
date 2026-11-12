@@ -22,36 +22,36 @@ class ShortLinkTest extends TestCase
     #[Test]
     public function a_short_link_redirects_and_can_change_destination(): void
     {
-        $this->get('/tautan')
+        $this->get('/links')
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('ShortLinks/Index')->has('links', 0));
 
-        $this->post('/tautan', [
+        $this->post('/links', [
             'url' => 'example.com/promo',
             'title' => 'Promo',
             'code' => 'promo1',
-        ])->assertRedirect('/tautan');
+        ])->assertRedirect('/links');
 
         $this->get('/s/promo1')->assertRedirect('https://example.com/promo');
         $this->assertSame(1, ShortLink::query()->first()->clicks);
 
-        $this->put('/tautan/promo1', [
+        $this->put('/links/promo1', [
             'url' => 'https://example.com/baru',
             'title' => 'Promo baru',
         ])->assertRedirect();
 
         $this->get('/s/promo1')->assertRedirect('https://example.com/baru');
 
-        $this->post('/tautan', [
+        $this->post('/links', [
             'url' => 'https://example.com/lain',
             'code' => 'promo1',
         ])->assertSessionHasErrors('code');
 
-        $this->post('/tautan', [
+        $this->post('/links', [
             'url' => 'javascript:alert(1)',
         ])->assertSessionHasErrors('url');
 
-        $this->post('/tautan/promo1/hapus')->assertRedirect('/tautan');
+        $this->post('/links/promo1/delete')->assertRedirect('/links');
         $this->get('/s/promo1')->assertNotFound();
     }
 
@@ -60,6 +60,6 @@ class ShortLinkTest extends TestCase
     {
         auth()->logout();
 
-        $this->get('/tautan')->assertRedirect('/masuk');
+        $this->get('/links')->assertRedirect('/login');
     }
 }

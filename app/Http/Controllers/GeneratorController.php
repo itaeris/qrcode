@@ -129,8 +129,8 @@ class GeneratorController extends Controller
      */
     private function range(Request $request): array
     {
-        $from = $this->day($request->string('dari')->toString()) ?? now()->subDays(29)->startOfDay();
-        $until = $this->day($request->string('sampai')->toString()) ?? now()->startOfDay();
+        $from = $this->day($request->string('from')->toString()) ?? now()->subDays(29)->startOfDay();
+        $until = $this->day($request->string('to')->toString()) ?? now()->startOfDay();
 
         if ($until->lt($from)) {
             [$from, $until] = [$until->copy(), $from->copy()];

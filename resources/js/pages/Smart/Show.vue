@@ -13,7 +13,7 @@ const presentation = computed(() => props.qr.presentation ?? {});
 const success = computed(() => page.props.flash?.success);
 
 function checkIn() {
-    form.post(`/q/${props.qr.code}/hadir`, {
+    form.post(`/q/${props.qr.code}/check-in`, {
         preserveScroll: true,
         onSuccess: () => form.reset('name'),
     });
@@ -65,7 +65,7 @@ function checkIn() {
             </form>
         </article>
         <p v-if="page.props.auth?.user" class="mt-6 text-center text-sm text-[#8a8794]">
-            <Link href="/buat" class="text-[#7a2030]">Create your own QR</Link>
+            <Link href="/create" class="text-[#7a2030]">Create your own QR</Link>
         </p>
     </AppShell>
 </template>

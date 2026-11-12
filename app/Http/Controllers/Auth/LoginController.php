@@ -57,14 +57,12 @@ class LoginController extends Controller
 
         $email = mb_strtolower(trim((string) $googleUser->getEmail()));
 
-        if ($email === '' || ! $this->googleEmailIsVerified($googleUser)) {
-            return redirect()->route('login')->with('error', 'Google did not confirm this email address.');
-        }
-
-        $user = User::query()->whereRaw('lower(email) = ?', [$email])->first();
+        $user = $email !== '' && $this->googleEmailIsVerified($googleUser)
+            ? User::query()->whereRaw('lower(email) = ?', [$email])->first()
+            : null;
 
         if (! $user) {
-            return redirect()->route('login')->with('error', 'This Google account is not registered.');
+            return redirect()->route('login')->with('error', 'This Google account cannot sign in.');
         }
 
         Auth::login($user);

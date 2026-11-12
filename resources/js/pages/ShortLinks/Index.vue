@@ -20,7 +20,7 @@ const pending = ref(null);
 const deleting = ref(false);
 
 function submit() {
-    form.post('/tautan', {
+    form.post('/links', {
         preserveScroll: true,
         onSuccess: () => form.reset(),
     });
@@ -42,7 +42,7 @@ function remove() {
     }
 
     deleting.value = true;
-    router.post(`/tautan/${pending.value.code}/hapus`, {}, {
+    router.post(`/links/${pending.value.code}/delete`, {}, {
         preserveScroll: true,
         onFinish: () => {
             deleting.value = false;
@@ -98,7 +98,7 @@ function remove() {
                         <Copy v-else :size="15" />
                         {{ copied === link.code ? 'Copied' : 'Copy' }}
                     </button>
-                    <Link :href="`/tautan/${link.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
+                    <Link :href="`/links/${link.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
                     <button
                         type="button"
                         class="grid size-9 cursor-pointer place-items-center rounded-full border border-[#fecdd3] bg-[#fff1f2] text-[#9f1239] shadow-sm transition hover:bg-[#ffe4e6] active:scale-95"

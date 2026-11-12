@@ -9,35 +9,35 @@ use App\Http\Controllers\ShortLinkController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('/masuk', [LoginController::class, 'create'])->name('login');
-    Route::post('/masuk', [LoginController::class, 'store'])->middleware('throttle:5,1');
-    Route::get('/masuk/google', [LoginController::class, 'google'])
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->middleware(['throttle:5,1', 'throttle:login-email']);
+    Route::get('/login/google', [LoginController::class, 'google'])
         ->middleware('throttle:10,1')
         ->name('google.redirect');
-    Route::get('/masuk/google/callback', [LoginController::class, 'googleCallback'])
+    Route::get('/login/google/callback', [LoginController::class, 'googleCallback'])
         ->middleware('throttle:10,1')
         ->name('google.callback');
 });
 
-Route::post('/keluar', [LoginController::class, 'destroy'])
+Route::post('/logout', [LoginController::class, 'destroy'])
     ->middleware('auth')
     ->name('logout');
 
 Route::middleware('auth')->group(function () {
     Route::get('/', [GeneratorController::class, 'index'])->name('home');
-    Route::get('/buat', [GeneratorController::class, 'create'])->name('qr.create');
-    Route::redirect('/saya', '/')->name('library');
-    Route::get('/kelola/{code}/ubah', [GeneratorController::class, 'edit'])
+    Route::get('/create', [GeneratorController::class, 'create'])->name('qr.create');
+    Route::redirect('/library', '/')->name('library');
+    Route::get('/manage/{code}/edit', [GeneratorController::class, 'edit'])
         ->where('code', '[a-z0-9]{8}')
         ->name('qr.edit');
-    Route::get('/kelola/{code}', [GeneratorController::class, 'manage'])
+    Route::get('/manage/{code}', [GeneratorController::class, 'manage'])
         ->where('code', '[a-z0-9]{8}')
         ->name('qr.manage');
 
-    Route::post('/qr/pratinjau', [QrCodeController::class, 'preview'])
+    Route::post('/qr/preview', [QrCodeController::class, 'preview'])
         ->middleware('throttle:60,1')
         ->name('qr.preview');
-    Route::post('/qr/milik', [QrCodeController::class, 'owned'])
+    Route::post('/qr/owned', [QrCodeController::class, 'owned'])
         ->middleware('throttle:30,1')
         ->name('qr.owned');
     Route::post('/qr', [QrCodeController::class, 'store'])
@@ -47,35 +47,35 @@ Route::middleware('auth')->group(function () {
         ->where('code', '[a-z0-9]{8}')
         ->middleware('throttle:30,1')
         ->name('qr.update');
-    Route::post('/qr/{code}/hapus', [QrCodeController::class, 'destroy'])
+    Route::post('/qr/{code}/delete', [QrCodeController::class, 'destroy'])
         ->where('code', '[a-z0-9]{8}')
         ->middleware('throttle:30,1')
         ->name('qr.destroy');
-    Route::post('/qr/{code}/buka', [QrCodeController::class, 'open'])
+    Route::post('/qr/{code}/open', [QrCodeController::class, 'open'])
         ->where('code', '[a-z0-9]{8}')
         ->middleware('throttle:30,1')
         ->name('qr.open');
 
-    Route::get('/pengaturan', [SettingsController::class, 'edit'])->name('settings');
-    Route::put('/pengaturan/sandi', [SettingsController::class, 'updatePassword'])
+    Route::get('/settings', [SettingsController::class, 'edit'])->name('settings');
+    Route::put('/settings/password', [SettingsController::class, 'updatePassword'])
         ->middleware('throttle:5,1')
         ->name('settings.password');
-    Route::post('/pengaturan/pengguna', [SettingsController::class, 'storeUser'])
+    Route::post('/settings/users', [SettingsController::class, 'storeUser'])
         ->middleware('throttle:10,1')
         ->name('settings.users.store');
 
-    Route::get('/tautan', [ShortLinkController::class, 'index'])->name('short-links.index');
-    Route::post('/tautan', [ShortLinkController::class, 'store'])
+    Route::get('/links', [ShortLinkController::class, 'index'])->name('short-links.index');
+    Route::post('/links', [ShortLinkController::class, 'store'])
         ->middleware('throttle:20,1')
         ->name('short-links.store');
-    Route::get('/tautan/{code}', [ShortLinkController::class, 'show'])
+    Route::get('/links/{code}', [ShortLinkController::class, 'show'])
         ->where('code', '[a-z0-9]{3,16}')
         ->name('short-links.show');
-    Route::put('/tautan/{code}', [ShortLinkController::class, 'update'])
+    Route::put('/links/{code}', [ShortLinkController::class, 'update'])
         ->where('code', '[a-z0-9]{3,16}')
         ->middleware('throttle:30,1')
         ->name('short-links.update');
-    Route::post('/tautan/{code}/hapus', [ShortLinkController::class, 'destroy'])
+    Route::post('/links/{code}/delete', [ShortLinkController::class, 'destroy'])
         ->where('code', '[a-z0-9]{3,16}')
         ->middleware('throttle:30,1')
         ->name('short-links.destroy');
@@ -90,16 +90,16 @@ Route::get('/q/{code}', [PublicQrController::class, 'show'])
     ->where('code', '[a-z0-9]{8}')
     ->middleware('throttle:120,1')
     ->name('qr.show');
-Route::get('/q/{code}/berkas', [PublicQrController::class, 'file'])
+Route::get('/q/{code}/file', [PublicQrController::class, 'file'])
     ->where('code', '[a-z0-9]{8}')
     ->name('qr.file');
 Route::get('/q/{code}/vcard', [PublicQrController::class, 'vcard'])
     ->where('code', '[a-z0-9]{8}')
     ->name('qr.vcard');
-Route::get('/q/{code}/kalender', [PublicQrController::class, 'calendar'])
+Route::get('/q/{code}/calendar', [PublicQrController::class, 'calendar'])
     ->where('code', '[a-z0-9]{8}')
     ->name('qr.calendar');
-Route::post('/q/{code}/hadir', [PublicQrController::class, 'checkIn'])
+Route::post('/q/{code}/check-in', [PublicQrController::class, 'checkIn'])
     ->where('code', '[a-z0-9]{8}')
     ->middleware('throttle:10,1')
     ->name('qr.checkin');

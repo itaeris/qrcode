@@ -25,7 +25,7 @@ class QrGeneratorTest extends TestCase
     #[Test]
     public function the_generator_page_renders(): void
     {
-        $this->get('/buat')
+        $this->get('/create')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Generate')
@@ -39,7 +39,7 @@ class QrGeneratorTest extends TestCase
     #[Test]
     public function a_preview_returns_svg(): void
     {
-        $this->postJson('/qr/pratinjau', [
+        $this->postJson('/qr/preview', [
             'type' => 'text',
             'fields' => ['body' => 'Halo Aeris'],
             'style' => QrInput::defaultStyle(),
@@ -49,7 +49,7 @@ class QrGeneratorTest extends TestCase
     #[Test]
     public function an_unknown_type_is_rejected(): void
     {
-        $this->postJson('/qr/pratinjau', [
+        $this->postJson('/qr/preview', [
             'type' => 'tidak-ada',
             'fields' => [],
             'style' => QrInput::defaultStyle(),
@@ -94,7 +94,7 @@ class QrGeneratorTest extends TestCase
 
         $this->get('/q/'.$code)->assertRedirect('https://example.com/baru');
 
-        $this->postJson('/qr/'.$code.'/hapus')->assertOk();
+        $this->postJson('/qr/'.$code.'/delete')->assertOk();
         $this->assertDatabaseMissing('qr_links', ['code' => $code]);
     }
 
@@ -113,7 +113,7 @@ class QrGeneratorTest extends TestCase
             ->assertOk()
             ->assertInertia(fn ($page) => $page->component('Smart/Show')->where('qr.presentation.check_in', true));
 
-        $this->post('/q/'.$code.'/hadir', ['name' => 'Aeris'])->assertRedirect();
+        $this->post('/q/'.$code.'/check-in', ['name' => 'Aeris'])->assertRedirect();
         $this->assertDatabaseHas('attendances', ['name' => 'Aeris']);
     }
 
@@ -132,6 +132,6 @@ class QrGeneratorTest extends TestCase
         $code = $response->json('code');
 
         $this->get('/q/'.$code)->assertOk()->assertInertia(fn ($page) => $page->component('Smart/Show'));
-        $this->get('/q/'.$code.'/berkas?unduh=1')->assertOk();
+        $this->get('/q/'.$code.'/file?download=1')->assertOk();
     }
 }

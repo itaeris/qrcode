@@ -9,7 +9,7 @@ const profileOpen = ref(false);
 const profileMenu = ref(null);
 
 function logout() {
-    router.post('/keluar');
+    router.post('/logout');
 }
 const showTop = ref(false);
 
@@ -41,8 +41,8 @@ function active(path) {
         return page.url === '/' || page.url.startsWith('/?');
     }
 
-    if (path === '/buat') {
-        return page.url === '/buat' || page.url.includes('/ubah');
+    if (path === '/create') {
+        return page.url === '/create' || page.url.includes('/edit');
     }
 
     return page.url.startsWith(path);
@@ -71,16 +71,16 @@ function active(path) {
                         Projects
                     </Link>
                     <Link
-                        href="/buat"
+                        href="/create"
                         class="rounded-full px-3 py-1.5"
-                        :class="active('/buat') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                        :class="active('/create') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
                         Create
                     </Link>
                     <Link
-                        href="/tautan"
+                        href="/links"
                         class="rounded-full px-3 py-1.5"
-                        :class="active('/tautan') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
+                        :class="active('/links') ? 'bg-white font-medium text-[#7a2030] shadow-sm' : 'text-[#5c5a66] hover:text-[#1c1b22]'"
                     >
                         Links
                     </Link>
@@ -88,7 +88,7 @@ function active(path) {
                         <button
                             type="button"
                             class="inline-flex max-w-44 cursor-pointer items-center gap-1 rounded-full bg-white px-3 py-1.5 font-medium shadow-sm"
-                            :class="active('/pengaturan') ? 'text-[#7a2030]' : 'text-[#1c1b22]'"
+                            :class="active('/settings') ? 'text-[#7a2030]' : 'text-[#1c1b22]'"
                             :aria-expanded="profileOpen"
                             aria-haspopup="menu"
                             @click="profileOpen = !profileOpen"
@@ -102,9 +102,9 @@ function active(path) {
                                 <div class="truncate text-xs text-[#6d6a7a]">{{ user.email }}</div>
                             </div>
                             <Link
-                                href="/pengaturan"
+                                href="/settings"
                                 class="block rounded-xl px-3 py-2 hover:bg-[#f8e8ea]"
-                                :class="active('/pengaturan') ? 'font-medium text-[#7a2030]' : 'text-[#1c1b22]'"
+                                :class="active('/settings') ? 'font-medium text-[#7a2030]' : 'text-[#1c1b22]'"
                                 role="menuitem"
                                 @click="profileOpen = false"
                             >

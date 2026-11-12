@@ -87,6 +87,10 @@ class SvgRenderer
             $svg = $this->embedLogo($svg, $logo, $logoMime, $logoSpace, $options['addQuietzone'] ? $options['quietzoneSize'] : 0, $background);
         }
 
+        if (preg_match('/<script|javascript:|foreignObject|\son[a-z]+\s*=/i', $svg) === 1) {
+            throw new InvalidArgumentException('QR image was rejected.');
+        }
+
         return $svg;
     }
 

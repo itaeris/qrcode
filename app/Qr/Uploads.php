@@ -33,9 +33,11 @@ class Uploads
 
         Validator::make(['file' => $file], ['file' => $rules])->validate();
         $extension = strtolower($file->getClientOriginalExtension());
-        $blocked = ['php', 'php3', 'php4', 'php5', 'phtml', 'phar', 'exe', 'sh', 'bat', 'cmd', 'com', 'cgi', 'htaccess', 'js', 'mjs', 'html', 'htm', 'svg', 'xml'];
+        $blocked = ['php', 'php3', 'php4', 'php5', 'php7', 'php8', 'pht', 'phtml', 'phar', 'phps', 'exe', 'sh', 'bat', 'cmd', 'com', 'cgi', 'htaccess', 'js', 'mjs', 'html', 'htm', 'shtml', 'xhtml', 'svg', 'svgz', 'xml'];
+        $mime = strtolower((string) $file->getMimeType());
+        $blockedMimes = ['text/html', 'application/xhtml+xml', 'image/svg+xml', 'text/xml', 'application/xml', 'application/javascript', 'text/javascript', 'application/x-httpd-php', 'application/x-php', 'text/x-php'];
 
-        if (in_array($extension, $blocked, true)) {
+        if (in_array($extension, $blocked, true) || in_array($mime, $blockedMimes, true)) {
             throw ValidationException::withMessages(['file' => 'This file type is not allowed.']);
         }
     }
@@ -92,7 +94,9 @@ class Uploads
      */
     public function readLogo(?string $path): array
     {
-        if (! $path || ! Storage::disk('local')->exists($path)) {
+        $path = str_replace('\\', '/', (string) $path);
+
+        if ($path === '' || str_contains($path, '..') || ! str_starts_with($path, 'qr-logos/') || ! Storage::disk('local')->exists($path)) {
             return [null, null];
         }
 

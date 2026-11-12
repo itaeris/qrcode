@@ -20,7 +20,7 @@ const emit = defineEmits(['save']);
 const copied = ref(false);
 const downloadError = ref('');
 
-const safeSvg = computed(() => (props.svg.startsWith('<svg') && !props.svg.includes('<script') ? props.svg : ''));
+const safeSvg = computed(() => (props.svg.startsWith('<svg') && !/<script|javascript:|foreignObject|\son[a-z]+\s*=/i.test(props.svg) ? props.svg : ''));
 const canDownload = computed(() => safeSvg.value && (!props.smart || (props.saved && !props.dirty)));
 const showSave = computed(() => props.saving || (Boolean(safeSvg.value) && (!props.saved || props.dirty)));
 

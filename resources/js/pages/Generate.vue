@@ -174,7 +174,7 @@ async function preview() {
     loading.value = true;
 
     try {
-        const data = await api('/qr/pratinjau', { body: formData(), signal: controller.signal });
+        const data = await api('/qr/preview', { body: formData(), signal: controller.signal });
         svg.value = data.svg;
         previewError.value = '';
     } catch (error) {
@@ -269,7 +269,7 @@ async function save() {
 }
 
 async function hydrate(secret) {
-    const data = await api(`/qr/${props.editingCode}/buka`, { body: { secret } });
+    const data = await api(`/qr/${props.editingCode}/open`, { body: { secret } });
     const type = props.types.find((item) => item.id === data.type) ?? props.types[0];
 
     hydrating.value = true;

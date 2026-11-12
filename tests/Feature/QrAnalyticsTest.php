@@ -53,7 +53,7 @@ class QrAnalyticsTest extends TestCase
 
         $today = now()->toDateString();
 
-        $this->get('/kelola/'.$code.'?dari='.$today.'&sampai='.$today)
+        $this->get('/manage/'.$code.'?from='.$today.'&to='.$today)
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Manage')
@@ -64,7 +64,7 @@ class QrAnalyticsTest extends TestCase
                 ->where('places.0.name', 'Jakarta, Indonesia')
                 ->where('places.0.count', 1));
 
-        $this->get('/kelola/'.$code.'/ubah')
+        $this->get('/manage/'.$code.'/edit')
             ->assertOk()
             ->assertInertia(fn ($page) => $page
                 ->component('Generate')
@@ -76,6 +76,6 @@ class QrAnalyticsTest extends TestCase
     {
         auth()->logout();
 
-        $this->get('/kelola/abcdefgh')->assertRedirect('/masuk');
+        $this->get('/manage/abcdefgh')->assertRedirect('/login');
     }
 }

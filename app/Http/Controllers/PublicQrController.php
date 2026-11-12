@@ -46,19 +46,20 @@ class PublicQrController extends Controller
     public function file(Request $request, string $code): StreamedResponse
     {
         $link = $this->find($code);
-        abort_unless($link->file_path && Storage::disk('local')->exists($link->file_path), 404);
-
-        $download = $request->boolean('unduh');
+        $path = $this->storedFile($link);
+        $name = $this->downloadName($link->file_name);
+        $mime = $this->publicMime($link->file_mime);
         $headers = [
-            'Content-Type' => $link->file_mime ?: 'application/octet-stream',
+            'Content-Type' => $mime,
             'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "default-src 'none'; sandbox",
         ];
 
-        if ($download || ! $this->inline($link->file_mime)) {
-            return Storage::disk('local')->download($link->file_path, $link->file_name ?: 'file', $headers);
+        if ($request->boolean('download') || ! $this->inline($mime)) {
+            return Storage::disk('local')->download($path, $name, $headers);
         }
 
-        return Storage::disk('local')->response($link->file_path, $link->file_name, $headers);
+        return Storage::disk('local')->response($path, $name, $headers);
     }
 
     public function vcard(string $code): \Illuminate\Http\Response
@@ -143,7 +144,7 @@ class PublicQrController extends Controller
         }
 
         if ($link->file_path) {
-            $actions[] = ['label' => 'Download file', 'href' => route('qr.file', ['code' => $link->code, 'unduh' => 1])];
+            $actions[] = ['label' => 'Download file', 'href' => route('qr.file', ['code' => $link->code, 'download' => 1])];
             $presentation['media'] = match ($link->type) {
                 'image', 'png' => 'image',
                 'audio' => 'audio',
@@ -157,20 +158,75 @@ class PublicQrController extends Controller
             $presentation['check_in'] = true;
         }
 
-        $presentation['actions'] = $actions;
+        $presentation['actions'] = array_values(array_filter(array_map(
+            function (mixed $action): ?array {
+                if (! is_array($action)) {
+                    return null;
+                }
+
+                $href = SafeUrl::href((string) ($action['href'] ?? ''));
+
+                if ($href === null) {
+                    return null;
+                }
+
+                return [
+                    'label' => mb_substr((string) ($action['label'] ?? 'Open'), 0, 80),
+                    'href' => $href,
+                ];
+            },
+            $actions,
+        )));
 
         return $presentation;
     }
 
-    private function inline(?string $mime): bool
+    private function storedFile(QrLink $link): string
     {
-        if (! $mime) {
-            return false;
-        }
+        $path = str_replace('\\', '/', (string) $link->file_path);
 
-        return str_starts_with($mime, 'image/')
-            || str_starts_with($mime, 'audio/')
-            || str_starts_with($mime, 'video/')
-            || $mime === 'application/pdf';
+        abort_unless(
+            $path !== ''
+            && ! str_contains($path, '..')
+            && str_starts_with($path, 'qr-files/')
+            && Storage::disk('local')->exists($path),
+            404,
+        );
+
+        return $path;
+    }
+
+    private function downloadName(?string $name): string
+    {
+        $name = str_replace(['"', '\\', '/', "\r", "\n"], '', (string) $name);
+        $name = trim($name);
+
+        return $name !== '' ? mb_substr($name, 0, 120) : 'file';
+    }
+
+    private function publicMime(?string $mime): string
+    {
+        $mime = strtolower(trim(explode(';', (string) $mime)[0]));
+
+        return $this->inline($mime) ? $mime : 'application/octet-stream';
+    }
+
+    private function inline(string $mime): bool
+    {
+        return in_array($mime, [
+            'image/png',
+            'image/jpeg',
+            'image/gif',
+            'image/webp',
+            'audio/mpeg',
+            'audio/wav',
+            'audio/mp4',
+            'audio/ogg',
+            'audio/aac',
+            'video/mp4',
+            'video/webm',
+            'video/quicktime',
+            'application/pdf',
+        ], true);
     }
 }

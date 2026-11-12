@@ -25,7 +25,7 @@ composer run dev
 
 Open http://127.0.0.1:8000. `composer run dev` starts the PHP server and Vite together.
 
-The admin account is created by `database/seeders/AdminUserSeeder.php`. Sign in at http://127.0.0.1:8000/masuk. Google sign-in works only for an email that an admin has already added. Register `http://localhost:8000/masuk/google/callback` as an authorized redirect URI in Google Cloud. Production uses `https://qrcode.aerisbeaute.com/masuk/google/callback`.
+The admin account is created by `database/seeders/AdminUserSeeder.php`. Sign in at http://127.0.0.1:8000/login. Google sign-in works only for an email that an admin has already added. Register `http://localhost:8000/login/google/callback` as an authorized redirect URI in Google Cloud. Production uses `https://qrcode.aerisbeaute.com/login/google/callback`.
 
 To build the frontend without the Vite dev server:
 
@@ -38,13 +38,13 @@ php artisan serve
 
 | Address | Purpose |
 | --- | --- |
-| `/masuk` | Sign in |
+| `/login` | Sign in |
 | `/` | Project list |
-| `/buat` | Create a QR |
-| `/kelola/{code}` | Scan analytics |
-| `/kelola/{code}/ubah` | Edit a saved QR |
-| `/tautan` | Short links |
-| `/pengaturan` | Password and users |
+| `/create` | Create a QR |
+| `/manage/{code}` | Scan analytics |
+| `/manage/{code}/edit` | Edit a saved QR |
+| `/links` | Short links |
+| `/settings` | Password and users |
 | `/q/{code}` | Public page when a QR is scanned |
 | `/s/{code}` | Public short-link redirect |
 

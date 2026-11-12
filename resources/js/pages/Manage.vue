@@ -40,9 +40,9 @@ function scrollChart(direction) {
 }
 
 function apply() {
-    router.get(`/kelola/${props.qr.code}`, {
-        dari: dari.value,
-        sampai: sampai.value,
+    router.get(`/manage/${props.qr.code}`, {
+        from: dari.value,
+        to: sampai.value,
     }, {
         preserveScroll: true,
     });

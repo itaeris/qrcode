@@ -36,7 +36,7 @@ export async function api(url, { body, signal } = {}) {
     const data = await response.json().catch(() => ({}));
 
     if (response.status === 401) {
-        window.location.assign('/masuk');
+        window.location.assign('/login');
     }
 
     if (!response.ok) {
