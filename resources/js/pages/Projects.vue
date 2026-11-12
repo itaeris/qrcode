@@ -104,6 +104,7 @@ function formatTime(value) {
                 </div>
                 <div class="flex items-center gap-2">
                     <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Kelola</Link>
+                    <Link :href="`/kelola/${item.code}/ubah`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Buka</a>
                     <button
                         type="button"
@@ -133,6 +134,7 @@ function formatTime(value) {
                 </div>
                 <div class="mt-5 flex flex-wrap gap-2">
                     <Link :href="`/kelola/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Kelola</Link>
+                    <Link :href="`/kelola/${item.code}/ubah`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Buka</a>
                 </div>
             </article>

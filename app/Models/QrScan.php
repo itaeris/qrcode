@@ -13,6 +13,10 @@ class QrScan extends Model
         'qr_link_id',
         'ip',
         'user_agent',
+        'city',
+        'region',
+        'country',
+        'device',
     ];
 
     public function link(): BelongsTo

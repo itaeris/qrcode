@@ -8,6 +8,7 @@ use App\Models\QrScan;
 use App\Qr\Catalog;
 use App\Qr\PayloadBuilder;
 use App\Qr\SafeUrl;
+use App\Qr\Visitor;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -110,11 +111,18 @@ class PublicQrController extends Controller
 
     private function recordScan(QrLink $link, Request $request): void
     {
+        $ip = $request->ip();
+        $place = Visitor::place($ip);
+
         $link->increment('scans');
         QrScan::query()->create([
             'qr_link_id' => $link->id,
-            'ip' => $request->ip(),
+            'ip' => $ip,
             'user_agent' => mb_substr((string) $request->userAgent(), 0, 255),
+            'device' => Visitor::device($request->userAgent()),
+            'city' => $place['city'],
+            'region' => $place['region'],
+            'country' => $place['country'],
         ]);
     }
 

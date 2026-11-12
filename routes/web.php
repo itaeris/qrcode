@@ -20,9 +20,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [GeneratorController::class, 'index'])->name('home');
     Route::get('/buat', [GeneratorController::class, 'create'])->name('qr.create');
     Route::redirect('/saya', '/')->name('library');
-    Route::get('/kelola/{code}', [GeneratorController::class, 'edit'])
+    Route::get('/kelola/{code}/ubah', [GeneratorController::class, 'edit'])
         ->where('code', '[a-z0-9]{8}')
         ->name('qr.edit');
+    Route::get('/kelola/{code}', [GeneratorController::class, 'manage'])
+        ->where('code', '[a-z0-9]{8}')
+        ->name('qr.manage');
 
     Route::post('/qr/pratinjau', [QrCodeController::class, 'preview'])
         ->middleware('throttle:60,1')

@@ -28,7 +28,7 @@ function active(path) {
     }
 
     if (path === '/buat') {
-        return page.url === '/buat' || page.url.startsWith('/kelola');
+        return page.url === '/buat' || page.url.includes('/ubah');
     }
 
     return page.url.startsWith(path);
