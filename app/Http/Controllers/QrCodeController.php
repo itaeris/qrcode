@@ -62,7 +62,7 @@ class QrCodeController extends Controller
 
     public function update(Request $request, string $code): JsonResponse
     {
-        $link = $this->find($code);
+        $link = $this->editable($code);
         $input = QrInput::fromRequest($request, $link);
         $saved = $this->publisher->update($link, $input, QrInput::contentFile($request), QrInput::logoFile($request));
 
@@ -71,14 +71,14 @@ class QrCodeController extends Controller
 
     public function destroy(string $code): JsonResponse
     {
-        $this->publisher->destroy($this->find($code));
+        $this->publisher->destroy($this->ownedLink($code));
 
         return response()->json(['ok' => true]);
     }
 
     public function open(Request $request, string $code): JsonResponse
     {
-        $link = $this->find($code);
+        $link = $this->editable($code);
 
         return response()->json([
             ...$this->describe($link, $this->publisher->svgFor($link), route('qr.show', $link->code)),
@@ -137,9 +137,14 @@ class QrCodeController extends Controller
         return response()->json(['items' => $found]);
     }
 
-    private function find(string $code): QrLink
+    private function ownedLink(string $code): QrLink
     {
         return QrLink::query()->forUser((int) auth()->id())->where('code', $code)->firstOrFail();
+    }
+
+    private function editable(string $code): QrLink
+    {
+        return QrLink::query()->editableBy((int) auth()->id())->where('code', $code)->firstOrFail();
     }
 
     private function existing(Request $request): ?QrLink
@@ -150,7 +155,7 @@ class QrCodeController extends Controller
             return null;
         }
 
-        return QrLink::query()->forUser((int) $request->user()->id)->where('code', $code)->first();
+        return QrLink::query()->editableBy((int) $request->user()->id)->where('code', $code)->first();
     }
 
     /**

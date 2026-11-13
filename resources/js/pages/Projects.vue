@@ -1,8 +1,9 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
-import { ChevronDown, Download, LayoutGrid, List, Trash2 } from '@lucide/vue';
+import { ChevronDown, Download, LayoutGrid, List, Share2, Trash2 } from '@lucide/vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import AppShell from '../Components/AppShell.vue';
+import ShareDialog from '../Components/ShareDialog.vue';
 import { api } from '../lib/api';
 import { downloadPng } from '../lib/download';
 import { forget, loadMine } from '../lib/storage';
@@ -18,6 +19,21 @@ const deleting = ref(false);
 const error = ref('');
 const createOpen = ref(false);
 const createMenu = ref(null);
+const sharing = ref(null);
+
+function isOwner(item) {
+    return item.access === 'owner';
+}
+
+function canEdit(item) {
+    return item.access === 'owner' || item.access === 'edit';
+}
+
+function setShares(shares) {
+    if (sharing.value) {
+        sharing.value.shares = shares;
+    }
+}
 
 onMounted(() => {
     const local = loadMine();
@@ -152,10 +168,16 @@ async function download(item) {
                     <p class="text-xs text-[#6d6a7a]">{{ item.scans }} scans · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <span v-if="!isOwner(item)" class="rounded-full bg-[#f8e8ea] px-2.5 py-1 text-xs font-medium text-[#7a2030]">{{ item.access === 'edit' ? 'Can edit' : 'View only' }}</span>
                     <Link :href="`/manage/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
-                    <Link :href="`/manage/${item.code}/edit`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
+                    <Link v-if="canEdit(item)" :href="`/manage/${item.code}/edit`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Open</a>
+                    <button v-if="isOwner(item)" type="button" class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm" @click="sharing = item">
+                        <Share2 :size="15" />
+                        Share
+                    </button>
                     <button
+                        v-if="isOwner(item)"
                         type="button"
                         class="grid size-9 cursor-pointer place-items-center rounded-full border border-[#fecdd3] bg-[#fff1f2] text-[#9f1239] shadow-sm transition hover:bg-[#ffe4e6] active:scale-95"
                         aria-label="Delete"
@@ -169,6 +191,7 @@ async function download(item) {
         <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <article v-for="item in items" :key="item.code" class="relative flex flex-col rounded-3xl border border-[#e6e7ee] bg-white p-5 shadow-[0_1px_2px_rgba(20,18,31,0.04)]">
                 <button
+                    v-if="isOwner(item)"
                     type="button"
                     class="absolute top-4 right-4 grid size-9 cursor-pointer place-items-center rounded-full border border-[#fecdd3] bg-[#fff1f2] text-[#9f1239] shadow-sm transition hover:bg-[#ffe4e6] active:scale-95"
                     aria-label="Delete"
@@ -176,16 +199,23 @@ async function download(item) {
                 >
                     <Trash2 :size="16" />
                 </button>
-                <div class="qr-preview mr-10 aspect-square max-w-40 overflow-hidden rounded-2xl border border-[#f0f1f5] bg-[#fafafb] p-2" v-html="qrSvg(item.svg)" />
+                <div class="qr-preview aspect-square max-w-40 overflow-hidden rounded-2xl border border-[#f0f1f5] bg-[#fafafb] p-2" :class="isOwner(item) ? 'mr-10' : ''" v-html="qrSvg(item.svg)" />
                 <div class="mt-4 pr-2">
-                    <div class="text-xs font-medium text-[#7a2030]">{{ item.type_label }}</div>
+                    <div class="flex items-center gap-2">
+                        <div class="text-xs font-medium text-[#7a2030]">{{ item.type_label }}</div>
+                        <span v-if="!isOwner(item)" class="rounded-full bg-[#f8e8ea] px-2 py-0.5 text-xs font-medium text-[#7a2030]">{{ item.access === 'edit' ? 'Can edit' : 'View only' }}</span>
+                    </div>
                     <h2 class="mt-2 text-lg font-semibold tracking-tight">{{ item.title }}</h2>
                     <p class="mt-1 text-sm text-[#6d6a7a]">{{ item.scans }} scans · {{ formatTime(item.created_at) }}</p>
                 </div>
                 <div class="mt-5 flex flex-wrap gap-2">
                     <Link :href="`/manage/${item.code}`" class="rounded-full bg-[#f8e8ea] px-3 py-1.5 text-sm font-medium text-[#7a2030]">Manage</Link>
-                    <Link :href="`/manage/${item.code}/edit`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
+                    <Link v-if="canEdit(item)" :href="`/manage/${item.code}/edit`" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Edit</Link>
                     <a :href="item.url" target="_blank" rel="noreferrer" class="rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm">Open</a>
+                    <button v-if="isOwner(item)" type="button" class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm" @click="sharing = item">
+                        <Share2 :size="15" />
+                        Share
+                    </button>
                     <button type="button" class="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-[#e6e7ee] px-3 py-1.5 text-sm" @click="download(item)">
                         <Download :size="15" />
                         Download
@@ -193,6 +223,7 @@ async function download(item) {
                 </div>
             </article>
         </div>
+        <ShareDialog v-if="sharing" :project="sharing" @close="sharing = null" @shares="setShares" />
         <div v-if="pendingDelete" class="fixed inset-0 z-30 grid place-items-center bg-[#1c1b22]/40 px-4" @click.self="pendingDelete = null">
             <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
                 <h2 id="delete-title" class="text-lg font-semibold">Delete project?</h2>

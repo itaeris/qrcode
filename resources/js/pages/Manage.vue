@@ -62,7 +62,7 @@ function formatTime(value) {
                 <h1 class="mt-1 text-2xl font-semibold tracking-tight">{{ qr.title }}</h1>
                 <p class="mt-1 text-sm text-[#6d6a7a]">{{ qr.type_label }} · {{ qr.scans }} scans</p>
             </div>
-            <Link :href="qr.edit_url" class="rounded-full bg-[#7a2030] px-4 py-2 text-sm font-medium text-white">Edit</Link>
+            <Link v-if="qr.can_edit" :href="qr.edit_url" class="rounded-full bg-[#7a2030] px-4 py-2 text-sm font-medium text-white">Edit</Link>
         </div>
         <form class="relative z-10 mb-4 flex flex-wrap items-end gap-3 rounded-3xl border border-[#e6e7ee] bg-white p-4" @submit.prevent="apply">
             <DateField v-model="dari" label="From" />

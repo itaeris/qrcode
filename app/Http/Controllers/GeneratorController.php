@@ -16,16 +16,20 @@ class GeneratorController extends Controller
 {
     public function index(QrPublisher $publisher): Response
     {
+        $userId = (int) auth()->id();
         $projects = QrLink::query()
-            ->forUser((int) auth()->id())
+            ->visibleTo($userId)
+            ->with(['shares.user'])
             ->latest()
             ->get()
-            ->map(function (QrLink $link) use ($publisher): array {
+            ->map(function (QrLink $link) use ($publisher, $userId): array {
                 try {
                     $svg = $publisher->svgFor($link);
                 } catch (\Throwable) {
                     $svg = null;
                 }
+
+                $access = $link->accessFor($userId);
 
                 return [
                     'code' => $link->code,
@@ -37,6 +41,8 @@ class GeneratorController extends Controller
                     'created_at' => $link->created_at?->toIso8601String(),
                     'svg' => $svg,
                     'background' => $link->style['bg'] ?? '#ffffff',
+                    'access' => $access,
+                    'shares' => $access === 'owner' ? $link->shareList() : [],
                 ];
             })
             ->values();
@@ -57,7 +63,7 @@ class GeneratorController extends Controller
     public function edit(string $code): Response
     {
         abort_unless(
-            QrLink::query()->forUser((int) auth()->id())->where('code', $code)->exists(),
+            QrLink::query()->editableBy((int) auth()->id())->where('code', $code)->exists(),
             404,
         );
 
@@ -69,7 +75,8 @@ class GeneratorController extends Controller
 
     public function manage(Request $request, string $code): Response
     {
-        $link = QrLink::query()->forUser((int) auth()->id())->where('code', $code)->firstOrFail();
+        $userId = (int) auth()->id();
+        $link = QrLink::query()->visibleTo($userId)->where('code', $code)->firstOrFail();
         [$from, $until] = $this->range($request);
 
         $scans = $link->scansLog()
@@ -112,6 +119,7 @@ class GeneratorController extends Controller
                 'type_label' => Catalog::find($link->type)['label'] ?? $link->type,
                 'scans' => $link->scans,
                 'edit_url' => route('qr.edit', $link->code),
+                'can_edit' => $link->accessFor($userId) !== 'view',
             ],
             'filters' => [
                 'from' => $from->toDateString(),
