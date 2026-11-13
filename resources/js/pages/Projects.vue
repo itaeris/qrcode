@@ -10,6 +10,7 @@ import { forget, loadMine } from '../lib/storage';
 
 const props = defineProps({
     projects: { type: Array, required: true },
+    accounts: { type: Array, required: true },
 });
 
 const items = ref(props.projects);
@@ -223,7 +224,7 @@ async function download(item) {
                 </div>
             </article>
         </div>
-        <ShareDialog v-if="sharing" :project="sharing" @close="sharing = null" @shares="setShares" />
+        <ShareDialog v-if="sharing" :project="sharing" :accounts="props.accounts" @close="sharing = null" @shares="setShares" />
         <div v-if="pendingDelete" class="fixed inset-0 z-30 grid place-items-center bg-[#1c1b22]/40 px-4" @click.self="pendingDelete = null">
             <div class="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl" role="alertdialog" aria-modal="true" aria-labelledby="delete-title">
                 <h2 id="delete-title" class="text-lg font-semibold">Delete project?</h2>

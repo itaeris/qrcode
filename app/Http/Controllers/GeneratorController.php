@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\QrLink;
 use App\Models\QrScan;
+use App\Models\User;
 use App\Qr\Catalog;
 use App\Qr\Visitor;
 use App\Services\QrPublisher;
@@ -49,6 +50,16 @@ class GeneratorController extends Controller
 
         return Inertia::render('Projects', [
             'projects' => $projects,
+            'accounts' => User::query()
+                ->whereKeyNot($userId)
+                ->orderBy('name')
+                ->get(['id', 'name', 'email'])
+                ->map(fn (User $user): array => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                ])
+                ->all(),
         ]);
     }
 

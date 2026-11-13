@@ -29,6 +29,13 @@ class ProjectShareTest extends TestCase
         ])->assertOk();
         $code = $created->json('code');
 
+        $this->actingAs($owner)->get('/')
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->has('accounts', 1)
+                ->where('accounts.0.email', 'member@example.com')
+                ->where('accounts.0.name', 'Member'));
+
         $this->actingAs($owner)->postJson('/qr/'.$code.'/shares', [
             'email' => 'Member@Example.com',
             'role' => 'view',
