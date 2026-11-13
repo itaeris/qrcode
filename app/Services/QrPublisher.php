@@ -24,7 +24,7 @@ class QrPublisher
     /**
      * @return array{link: QrLink, svg: string, url: string}
      */
-    public function store(QrInput $input, ?UploadedFile $file, ?UploadedFile $logo): array
+    public function store(QrInput $input, ?UploadedFile $file, ?UploadedFile $logo, int $userId): array
     {
         $built = $this->payloads->build($input->type, $input->fields);
         $code = QrLink::issueCode();
@@ -32,6 +32,7 @@ class QrPublisher
         $logoPath = $logo ? $this->uploads->storeLogo($code, $logo) : null;
 
         $link = QrLink::query()->create([
+            'user_id' => $userId,
             'code' => $code,
             'secret' => Str::random(40),
             'type' => $input->type,

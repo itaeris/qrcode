@@ -17,6 +17,7 @@ class GeneratorController extends Controller
     public function index(QrPublisher $publisher): Response
     {
         $projects = QrLink::query()
+            ->forUser((int) auth()->id())
             ->latest()
             ->get()
             ->map(function (QrLink $link) use ($publisher): array {
@@ -55,7 +56,10 @@ class GeneratorController extends Controller
 
     public function edit(string $code): Response
     {
-        abort_unless(QrLink::query()->where('code', $code)->exists(), 404);
+        abort_unless(
+            QrLink::query()->forUser((int) auth()->id())->where('code', $code)->exists(),
+            404,
+        );
 
         return Inertia::render('Generate', [
             'types' => Catalog::all(),
@@ -65,7 +69,7 @@ class GeneratorController extends Controller
 
     public function manage(Request $request, string $code): Response
     {
-        $link = QrLink::query()->where('code', $code)->firstOrFail();
+        $link = QrLink::query()->forUser((int) auth()->id())->where('code', $code)->firstOrFail();
         [$from, $until] = $this->range($request);
 
         $scans = $link->scansLog()

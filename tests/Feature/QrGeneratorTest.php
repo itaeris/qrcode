@@ -83,7 +83,7 @@ class QrGeneratorTest extends TestCase
             'type' => 'url',
             'fields' => ['url' => 'https://example.com/baru'],
             'style' => QrInput::defaultStyle(),
-        ])->assertForbidden();
+        ])->assertOk();
 
         $this->postJson('/qr/'.$code, [
             'secret' => $response->json('secret'),

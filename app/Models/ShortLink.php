@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ShortLink extends Model
 {
     protected $fillable = [
+        'user_id',
         'code',
         'title',
         'url',
@@ -19,6 +22,20 @@ class ShortLink extends Model
         return [
             'clicks' => 'integer',
         ];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @param  Builder<ShortLink>  $query
+     * @return Builder<ShortLink>
+     */
+    public function scopeForUser(Builder $query, int $userId): Builder
+    {
+        return $query->where('user_id', $userId);
     }
 
     public function visits(): HasMany

@@ -18,6 +18,7 @@ class ShortLinkController extends Controller
     public function index(): Response
     {
         $links = ShortLink::query()
+            ->forUser((int) auth()->id())
             ->latest()
             ->get()
             ->map(fn (ShortLink $link): array => $this->summary($link))
@@ -34,6 +35,7 @@ class ShortLinkController extends Controller
         $code = $data['code'] !== '' ? $data['code'] : ShortLink::issueCode();
 
         ShortLink::query()->create([
+            'user_id' => $request->user()->id,
             'code' => $code,
             'title' => $data['title'] !== '' ? $data['title'] : $this->host($data['url']),
             'url' => $data['url'],
@@ -46,7 +48,7 @@ class ShortLinkController extends Controller
 
     public function show(Request $request, string $code): Response
     {
-        $link = $this->find($code);
+        $link = $this->owned($code);
         [$from, $until] = $this->range($request);
         $clicks = $link->visits()
             ->whereBetween('created_at', [$from, $until])
@@ -99,7 +101,7 @@ class ShortLinkController extends Controller
 
     public function update(Request $request, string $code): RedirectResponse
     {
-        $link = $this->find($code);
+        $link = $this->owned($code);
         $data = $this->validated($request, false);
 
         $link->update([
@@ -112,7 +114,7 @@ class ShortLinkController extends Controller
 
     public function destroy(string $code): RedirectResponse
     {
-        $this->find($code)->delete();
+        $this->owned($code)->delete();
 
         return redirect()
             ->route('short-links.index')
@@ -142,6 +144,11 @@ class ShortLinkController extends Controller
     private function find(string $code): ShortLink
     {
         return ShortLink::query()->where('code', $code)->firstOrFail();
+    }
+
+    private function owned(string $code): ShortLink
+    {
+        return ShortLink::query()->forUser((int) auth()->id())->where('code', $code)->firstOrFail();
     }
 
     /**

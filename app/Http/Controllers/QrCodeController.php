@@ -50,7 +50,12 @@ class QrCodeController extends Controller
     {
         $input = QrInput::fromRequest($request);
         $input->smart = true;
-        $saved = $this->publisher->store($input, QrInput::contentFile($request), QrInput::logoFile($request));
+        $saved = $this->publisher->store(
+            $input,
+            QrInput::contentFile($request),
+            QrInput::logoFile($request),
+            (int) $request->user()->id,
+        );
 
         return response()->json($this->describe($saved['link'], $saved['svg'], $saved['url'], true));
     }
@@ -58,7 +63,6 @@ class QrCodeController extends Controller
     public function update(Request $request, string $code): JsonResponse
     {
         $link = $this->find($code);
-        $this->authorizeLink($link, (string) $request->input('secret'));
         $input = QrInput::fromRequest($request, $link);
         $saved = $this->publisher->update($link, $input, QrInput::contentFile($request), QrInput::logoFile($request));
 
@@ -75,7 +79,6 @@ class QrCodeController extends Controller
     public function open(Request $request, string $code): JsonResponse
     {
         $link = $this->find($code);
-        $this->authorizeLink($link, (string) $request->input('secret'));
 
         return response()->json([
             ...$this->describe($link, $this->publisher->svgFor($link), route('qr.show', $link->code)),
@@ -112,7 +115,7 @@ class QrCodeController extends Controller
 
             $code = (string) ($item['code'] ?? '');
             $secret = (string) ($item['secret'] ?? '');
-            $link = QrLink::query()->where('code', $code)->first();
+            $link = QrLink::query()->forUser((int) $request->user()->id)->where('code', $code)->first();
 
             if (! $link || $secret === '' || ! hash_equals($link->secret, $secret)) {
                 continue;
@@ -136,30 +139,18 @@ class QrCodeController extends Controller
 
     private function find(string $code): QrLink
     {
-        return QrLink::query()->where('code', $code)->firstOrFail();
+        return QrLink::query()->forUser((int) auth()->id())->where('code', $code)->firstOrFail();
     }
 
     private function existing(Request $request): ?QrLink
     {
         $code = (string) $request->input('code');
-        $secret = (string) $request->input('secret');
 
-        if ($code === '' || $secret === '') {
+        if ($code === '') {
             return null;
         }
 
-        $link = QrLink::query()->where('code', $code)->first();
-
-        if (! $link || ! hash_equals($link->secret, $secret)) {
-            return null;
-        }
-
-        return $link;
-    }
-
-    private function authorizeLink(QrLink $link, string $secret): void
-    {
-        abort_unless($secret !== '' && hash_equals($link->secret, $secret), 403, 'The QR key does not match.');
+        return QrLink::query()->forUser((int) $request->user()->id)->where('code', $code)->first();
     }
 
     /**

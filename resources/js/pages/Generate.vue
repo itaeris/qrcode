@@ -316,17 +316,8 @@ onMounted(async () => {
         return;
     }
 
-    const secret = secretFor(props.editingCode);
-
-    if (!secret) {
-        needsSecret.value = true;
-        ready.value = true;
-
-        return;
-    }
-
     try {
-        await hydrate(secret);
+        await hydrate(secretFor(props.editingCode));
     } catch (error) {
         needsSecret.value = error.status === 403;
         previewError.value = error.message;
